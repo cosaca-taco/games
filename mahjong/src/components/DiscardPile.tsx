@@ -2,21 +2,19 @@ import React from 'react';
 import { Tile } from '../types/mahjong';
 import { TileComponent } from './TileComponent';
 
-interface Props {
-  discards: Tile[];
-  position: 'bottom' | 'right' | 'top' | 'left';
+interface DiscardPileProps {
+  tiles: Tile[];
+  vertical?: boolean;
 }
 
-export const DiscardPile: React.FC<Props> = ({ discards, position }) => {
-  const isVertical = position === 'right' || position === 'left';
-
+export function DiscardPile({ tiles, vertical }: DiscardPileProps) {
   return (
-    <div className={`discard-pile discard-pile-${position}`}>
-      <div className={`discard-grid ${isVertical ? 'discard-grid-vertical' : ''}`}>
-        {discards.map((tile, i) => (
-          <TileComponent key={`${tile.id}-${i}`} tile={tile} size="sm" />
+    <div className={`discard-pile`}>
+      <div className={`discard-grid${vertical ? ' discard-grid-vertical' : ''}`}>
+        {tiles.map((tile) => (
+          <TileComponent key={tile.id} tile={tile} size="sm" />
         ))}
       </div>
     </div>
   );
-};
+}
