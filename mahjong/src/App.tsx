@@ -62,13 +62,7 @@ function getAvailableActions(gs: GameState): string[] {
         actions.push('tsumoGiri');
       }
     } else {
-      if (player.melds.filter(m => m.type !== 'closedKan').length === 0) {
-        for (const t of player.hand) {
-          if (findShanten(player.hand.filter(tt => tt.id !== t.id), player.melds) === 0) {
-            actions.push('riichi'); break;
-          }
-        }
-      }
+      // 通常時：closedKanのみここで判定。立直はGameBoard側で選択牌に応じて表示
       for (const t of player.hand) {
         if (player.hand.filter(tt => tilesEqual(tt, t)).length === 4) {
           actions.push('closedKan'); break;

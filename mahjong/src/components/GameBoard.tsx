@@ -2,6 +2,7 @@ import React from 'react';
 import { GameState, Tile } from '../types/mahjong';
 import { TileComponent } from './TileComponent';
 import { getDoraFromIndicator } from '../game/yaku';
+import { findShanten } from '../game/hand';
 
 export type GameAction =
   | { type: 'discard'; tileId: number }
@@ -194,30 +195,58 @@ export const GameBoard: React.FC<Props> = ({
         )}
       </div>
 
-      {/* アクションボタン */}
-      {availableActions.length > 0 && (
-        <div className="mb-actions">
-          {availableActions.map(action => (
-            <button
-              key={action}
-              className="mb-action-btn"
-              style={{ backgroundColor: ACTION_COLORS[action] || '#444' }}
-              onClick={() => handleActionBtn(action)}
-            >
-              {ACTION_LABELS[action] || action}
-            </button>
-          ))}
-          {selectedTile && phase === 'playing' && currentPlayer === 0 && !players[0].isRiichi && (
-            <button
-              className="mb-action-btn"
-              style={{ backgroundColor: '#cc2200' }}
-              onClick={() => { onAction({ type: 'discard', tileId: selectedTile.id }); onTileSelect(null); }}
-            >
-              捨てる
-            </button>
-          )}
-        </div>
-      )}
+      {/* アクションボタン：選択状態や局面に応じて表示 */}
+      {(() => {
+        const isMyTurn = phase === 'playing' && currentPlayer === 0;
+        const isClaiming = phase === 'claiming';
+        const inRiichi = players[0].isRiichi;
+
+        // 選択牌が立直可能か判定
+        const canRiichiWithSelected = selectedTile && isMyTurn && !inRiichi
+          && players[0].melds.filter(m => m.type !== 'closedKan').length === 0
+          && findShanten(players[0].hand.filter(t => t.id !== selectedTile.id), players[0].melds) === 0;
+
+        const showBar = availableActions.length > 0 || (selectedTile && isMyTurn) || isClaiming;
+        if (!showBar) return null;
+
+        return (
+          <div className="mb-actions">
+            {/* 自摸・ツモ切り・暗槓など常時ボタン */}
+            {availableActions.map(action => (
+              <button
+                key={action}
+                className="mb-action-btn"
+                style={{ backgroundColor: ACTION_COLORS[action] || '#444' }}
+                onClick={() => handleActionBtn(action)}
+              >
+                {ACTION_LABELS[action] || action}
+              </button>
+            ))}
+
+            {/* 牌選択時：捨てるボタン */}
+            {selectedTile && isMyTurn && !inRiichi && (
+              <button
+                className="mb-action-btn"
+                style={{ backgroundColor: '#884400' }}
+                onClick={() => { onAction({ type: 'discard', tileId: selectedTile.id }); onTileSelect(null); }}
+              >
+                捨てる
+              </button>
+            )}
+
+            {/* 牌選択時：その牌で立直可能なら立直ボタン */}
+            {canRiichiWithSelected && (
+              <button
+                className="mb-action-btn"
+                style={{ backgroundColor: '#0044cc' }}
+                onClick={() => { onAction({ type: 'riichi', tileId: selectedTile.id }); onTileSelect(null); }}
+              >
+                立直
+              </button>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 };
