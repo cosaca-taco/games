@@ -78,23 +78,18 @@ export function calculateFu(
   }
 
   // Wait fu - simplified: kanchan or penchan = +2
-  // (shanpon and tanki = 0, ryanmen = 0)
-  // We detect kanchan/penchan by checking win tile position in mentsu
   for (const m of combination.mentsu) {
     if (m.type === 'shuntsu') {
       const nums = m.tiles.map(t => t.number).sort((a, b) => a - b);
       const winN = winTile.number;
       const winS = winTile.suit;
       if (m.tiles[0].suit === winS) {
-        // kanchan: win tile is middle
         if (winN === nums[1]) fu += 2;
-        // penchan: win is 3 of 1-2-3 or 7 of 7-8-9
         if ((nums[0] === 1 && winN === 3) || (nums[2] === 9 && winN === 7)) fu += 2;
       }
     }
   }
 
-  // Round up to nearest 10
   return Math.ceil(fu / 10) * 10;
 }
 
@@ -111,13 +106,11 @@ export function hanFuToPoints(
   fu: number,
   isDealer: boolean
 ): { total: number; ron: number; tsumoDealer: number; tsumoNonDealer: number } {
-  // Yakuman
   if (han >= 13) {
     const base = isDealer ? 48000 : 32000;
     return { total: base, ron: base, tsumoDealer: 16000, tsumoNonDealer: 8000 };
   }
 
-  // Mangan+
   let pointName = '';
   if (han >= 5 || (han === 4 && fu >= 30) || (han === 3 && fu >= 70)) pointName = 'mangan';
   if (han >= 8) pointName = 'haneman';
@@ -139,7 +132,6 @@ export function hanFuToPoints(
     };
   }
 
-  // Normal calculation
   const basicPoints = fu * Math.pow(2, han + 2);
   if (isDealer) {
     const tsumoEach = roundUpTo100(basicPoints * 2);
@@ -165,15 +157,12 @@ export function distributePoints(
   const honbaBonus = honba * 300;
 
   if (winResult.isTsumo) {
-    const { tsumoDealer, tsumoNonDealer } = hanFuToPoints(winResult.han, winResult.fu, isDealer);
+    const { tsumoDealer } = hanFuToPoints(winResult.han, winResult.fu, isDealer);
     let total = 0;
     for (let i = 0; i < n; i++) {
       if (i === winResult.winner) continue;
-      const pay = isDealer ? tsumoDealer : (i === /* dealer idx */ 0 ? tsumoDealer : tsumoNonDealer);
-      // Simplified: dealer pays double
-      const actualPay = tsumoDealer; // each pays tsumoDealer if dealer wins, or specific amounts otherwise
-      deltas[i] -= actualPay + Math.floor(honbaBonus / 3);
-      total += actualPay + Math.floor(honbaBonus / 3);
+      deltas[i] -= tsumoDealer + Math.floor(honbaBonus / 3);
+      total += tsumoDealer + Math.floor(honbaBonus / 3);
     }
     deltas[winResult.winner] = total + riichiSticks * 1000;
   } else {

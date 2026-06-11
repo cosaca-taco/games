@@ -11,7 +11,6 @@ function isDangerous(tile: Tile, gameState: GameState, forPlayer: number): boole
   for (const p of gameState.players) {
     if (p.id === forPlayer) continue;
     if (p.isRiichi) {
-      // Simplified: terminals and honors are safer, mid tiles dangerous
       if (tile.suit !== 'z' && tile.number >= 4 && tile.number <= 6) return true;
     }
   }
@@ -23,7 +22,6 @@ export function aiDiscard(player: Player, gameState: GameState): Tile {
   const hand = [...player.hand];
 
   if (difficulty === 'normal') {
-    // Discard tile that maximizes shanten reduction (greedy)
     let bestTile = hand[0];
     let bestShanten = 99;
     for (const t of hand) {
@@ -37,7 +35,6 @@ export function aiDiscard(player: Player, gameState: GameState): Tile {
   }
 
   if (difficulty === 'strong') {
-    // Like normal but avoid dangerous tiles when riichi opponents exist
     let bestTile = hand[0];
     let bestShanten = 99;
     for (const t of hand) {
@@ -50,7 +47,6 @@ export function aiDiscard(player: Player, gameState: GameState): Tile {
     return bestTile;
   }
 
-  // veryStrong: full tile efficiency + defense
   let bestTile = hand[0];
   let bestShanten = 99;
   let bestScore = -999;
@@ -58,8 +54,6 @@ export function aiDiscard(player: Player, gameState: GameState): Tile {
   for (const t of hand) {
     const sh = getShantenAfterDiscard(player, t);
     let score = -sh * 10;
-    // Bonus for keeping dora
-    // Penalty for dangerous tile kept
     if (isDangerous(t, gameState, player.id)) score -= 5;
     if (sh < bestShanten || (sh === bestShanten && score > bestScore)) {
       bestShanten = sh;
@@ -89,7 +83,6 @@ export function aiShouldClaim(
   const difficulty = gameState.settings.difficulty;
 
   if (claimType === 'pon' || claimType === 'kan') {
-    // Check if claiming reduces shanten significantly
     const currentShanten = findShanten(player.hand, player.melds);
     const newHand = player.hand.filter(t => !tilesEqual(t, tile)).slice(0, player.hand.length - 2);
     const newMeld: Meld = { type: claimType === 'pon' ? 'pon' : 'kan', tiles: [tile, tile, tile] };
@@ -117,7 +110,6 @@ export function aiChooseChiTiles(player: Player, tile: Tile): [Tile, Tile] | nul
   const n = tile.number;
   const s = tile.suit;
 
-  // Possible chi patterns: [n-2,n-1], [n-1,n+1], [n+1,n+2]
   const patterns: [number, number][] = [];
   if (n >= 3) patterns.push([n - 2, n - 1]);
   if (n >= 2 && n <= 8) patterns.push([n - 1, n + 1]);

@@ -26,7 +26,6 @@ export const PlayerArea: React.FC<Props> = ({
 
   return (
     <div className={`player-area player-area-${position} ${isCurrentTurn ? 'player-current' : ''}`}>
-      {/* Player info */}
       <div className="player-info">
         <span className="player-wind">{WIND_KANJI[player.seatWind - 1]}</span>
         <span className="player-name">{player.name}</span>
@@ -35,7 +34,6 @@ export const PlayerArea: React.FC<Props> = ({
         {isCurrentTurn && <span className="turn-indicator">▶</span>}
       </div>
 
-      {/* Melds */}
       {player.melds.length > 0 && (
         <div className="player-melds">
           {player.melds.map((meld, i) => (
@@ -48,9 +46,8 @@ export const PlayerArea: React.FC<Props> = ({
         </div>
       )}
 
-      {/* Hand tiles */}
       <div className={`player-hand player-hand-${position}`}>
-        {player.hand.map((tile, i) => (
+        {player.hand.map((tile) => (
           <TileComponent
             key={tile.id}
             tile={tile}
@@ -62,7 +59,6 @@ export const PlayerArea: React.FC<Props> = ({
         ))}
       </div>
 
-      {/* Discards */}
       <DiscardPile discards={player.discards} position={position} />
     </div>
   );

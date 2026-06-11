@@ -2,21 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { GameState, Tile } from '../types/mahjong';
 import { PlayerArea } from './PlayerArea';
 import { ActionButtons } from './ActionButtons';
-import { ScoreModal } from './ScoreModal';
 import { TileComponent } from './TileComponent';
-import {
-  discardTile,
-  declareRiichi,
-  claimChi,
-  claimPon,
-  claimKan,
-  declareWin,
-  skipClaim,
-  nextRound,
-  declareClosedKan,
-} from '../game/engine';
-import { findShanten, checkWin } from '../game/hand';
-import { aiDiscard, aiShouldRiichi, aiShouldClaim, aiChooseChiTiles } from '../game/ai';
 import { getDoraFromIndicator } from '../game/yaku';
 
 export type GameAction =
@@ -77,8 +63,6 @@ export const GameBoard: React.FC<Props> = ({
       case 'kan':
         if (phase === 'claiming') {
           onAction({ type: 'kan' });
-        } else {
-          // closedKan handled separately
         }
         break;
       case 'closedKan':
@@ -90,7 +74,6 @@ export const GameBoard: React.FC<Props> = ({
 
   return (
     <div className="game-board">
-      {/* Center board */}
       <div className="board-top-row">
         <PlayerArea
           player={players[2]}
@@ -148,7 +131,7 @@ export const GameBoard: React.FC<Props> = ({
             <div className="riichi-hint">立直可能 — 捨て牌を選ぶか立直ボタン</div>
           )}
           <ActionButtons
-            availableActions={availableActions}
+            actions={availableActions}
             onAction={handleActionBtn}
           />
           {selectedTile && phase === 'playing' && currentPlayer === 0 && !players[0].isRiichi && (
