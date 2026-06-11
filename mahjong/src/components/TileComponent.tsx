@@ -2,6 +2,11 @@ import React from 'react';
 import { Tile } from '../types/mahjong';
 import { getTileDisplay } from '../game/tiles';
 
+const KANJI_NUM: Record<number, string> = {
+  1: '一', 2: '二', 3: '三', 4: '四', 5: '五',
+  6: '六', 7: '七', 8: '八', 9: '九',
+};
+
 interface TileProps {
   tile: Tile | null;
   size?: 'sm' | 'md' | 'lg';
@@ -40,7 +45,7 @@ export function TileComponent({ tile, size = 'md', selected, clickable, faceDown
       ) : (
         <>
           <span className="tile-number" style={tile.isRed ? { color: '#cc0000' } : undefined}>
-            {tile.number}
+            {KANJI_NUM[tile.number] ?? tile.number}
           </span>
           <span className="tile-suit-label">{tile.suit.toUpperCase()}</span>
         </>
