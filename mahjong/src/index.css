@@ -9,18 +9,21 @@ body {
   background: #1a5c2a;
   color: #fff;
   overflow: hidden;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  max-width: 100%;
 }
 
 #root {
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  max-width: 100%;
 }
 
 .app {
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  max-width: 100%;
   position: relative;
 }
 
@@ -563,37 +566,44 @@ body {
 
 /* ---- SETTINGS SCREEN ---- */
 .settings-screen {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   background: linear-gradient(135deg, #0d3318 0%, #1a5c2a 50%, #0d3318 100%);
   padding: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+body.settings-mode {
+  overflow-y: auto;
 }
 
 .settings-card {
   background: rgba(0,0,0,0.5);
   border: 2px solid rgba(255,255,255,0.2);
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   max-width: 400px;
   width: 100%;
   color: #fff;
+  margin: auto;
 }
 
 .settings-title {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .mahjong-logo {
-  font-size: 48px;
+  font-size: 36px;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .settings-title h1 {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   margin-bottom: 4px;
 }
@@ -699,23 +709,68 @@ body {
 }
 
 /* Responsive tweaks */
-@media (max-height: 600px) {
+@media (max-height: 700px), (max-width: 430px) {
   .tile-md {
     width: 24px;
     height: 34px;
     font-size: 10px;
   }
+  .tile-lg {
+    width: 36px;
+    height: 50px;
+    font-size: 15px;
+  }
   .board-center {
-    gap: 4px;
-    padding: 4px;
+    gap: 3px;
+    padding: 3px;
+    font-size: 10px;
+  }
+  .center-round {
+    font-size: 11px;
+    padding: 2px 6px;
+  }
+  .player-info {
+    font-size: 10px;
+    padding: 1px 2px;
+    gap: 3px;
+  }
+  .player-wind {
+    font-size: 11px;
+    padding: 1px 3px;
+  }
+  .player-score {
+    font-size: 10px;
+  }
+  .action-btn {
+    min-width: 52px;
+    min-height: 40px;
+    padding: 6px 12px;
+    font-size: 14px;
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 375px) {
   .tile-md {
-    width: 26px;
-    height: 36px;
-    font-size: 10px;
+    width: 22px;
+    height: 30px;
+    font-size: 9px;
+  }
+  .settings-card {
+    padding: 12px;
+  }
+  .settings-title h1 {
+    font-size: 20px;
+  }
+  .settings-row {
+    font-size: 13px;
+  }
+}
+
+@media (max-height: 570px) {
+  .tile-md {
+    width: 20px;
+    height: 28px;
+    font-size: 8px;
   }
 }
 
@@ -771,10 +826,11 @@ body {
 
 .board-left-col, .board-right-col {
   flex: 0 0 auto;
-  width: 60px;
+  width: clamp(44px, 12vw, 70px);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .board-center {

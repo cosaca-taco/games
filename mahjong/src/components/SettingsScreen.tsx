@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GameSettings } from '../types/mahjong';
 
 interface Props {
@@ -6,6 +6,11 @@ interface Props {
 }
 
 export const SettingsScreen: React.FC<Props> = ({ onStart }) => {
+  useEffect(() => {
+    document.body.style.overflow = 'auto';
+    return () => { document.body.style.overflow = 'hidden'; };
+  }, []);
+
   const [settings, setSettings] = useState<GameSettings>({
     redDora: true,
     kuitan: true,

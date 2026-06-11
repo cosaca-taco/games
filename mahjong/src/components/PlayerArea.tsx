@@ -59,7 +59,7 @@ export const PlayerArea: React.FC<Props> = ({
         ))}
       </div>
 
-      <DiscardPile discards={player.discards} position={position} />
+      <DiscardPile tiles={player.discards} vertical={position === 'left' || position === 'right'} />
     </div>
   );
 };
