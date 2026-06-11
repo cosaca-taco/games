@@ -81,6 +81,7 @@ export interface GameState {
   isLastTile: boolean;
   dealer: number;
   turnCount: number;
+  drawnTileId?: number;
 }
 
 export interface MentsuGroup {

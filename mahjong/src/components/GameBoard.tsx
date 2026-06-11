@@ -156,17 +156,33 @@ export const GameBoard: React.FC<Props> = ({
           </div>
         )}
 
-        {/* 自分の手牌 */}
+        {/* 自分の手牌：ツモ牌を右端に分離 */}
         <div className="mb-human-hand">
-          {players[0].hand.map(tile => (
-            <TileComponent
-              key={tile.id}
-              tile={tile}
-              size="md"
-              selected={selectedTile?.id === tile.id}
-              onClick={() => handleTileClick(tile)}
-            />
-          ))}
+          {players[0].hand
+            .filter(tile => tile.id !== gameState.drawnTileId)
+            .map(tile => (
+              <TileComponent
+                key={tile.id}
+                tile={tile}
+                size="md"
+                selected={selectedTile?.id === tile.id}
+                onClick={() => handleTileClick(tile)}
+              />
+            ))}
+          {gameState.drawnTileId !== undefined && (() => {
+            const drawn = players[0].hand.find(t => t.id === gameState.drawnTileId);
+            return drawn ? (
+              <>
+                <span className="mb-tsumo-sep" />
+                <TileComponent
+                  tile={drawn}
+                  size="md"
+                  selected={selectedTile?.id === drawn.id}
+                  onClick={() => handleTileClick(drawn)}
+                />
+              </>
+            ) : null;
+          })()}
         </div>
 
         {selectedTile && phase === 'playing' && currentPlayer === 0 && !players[0].isRiichi && (

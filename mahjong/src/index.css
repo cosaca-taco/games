@@ -1105,3 +1105,10 @@ body.settings-mode {
   opacity: 0.8;
   transform: scale(0.96);
 }
+
+/* ツモ牌の区切り */
+.mb-tsumo-sep {
+  display: inline-block;
+  width: 8px;
+  flex-shrink: 0;
+}

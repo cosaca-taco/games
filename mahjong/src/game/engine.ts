@@ -97,6 +97,7 @@ export function dealTiles(state: GameState): GameState {
     turnCount: 0,
     kanCount: 0,
     isLastTile: false,
+    drawnTileId: dealerTile.id,
   };
 }
 
@@ -127,6 +128,7 @@ export function discardTile(state: GameState, tileId: number): GameState {
       players: newPlayers,
       phase: 'claiming',
       claimState,
+      drawnTileId: undefined,
     };
   }
 
@@ -205,6 +207,7 @@ function advanceTurn(state: GameState, players: Player[], currentPlayer: number)
     claimState: undefined,
     isLastTile: newWall.length === 0,
     turnCount: state.turnCount + 1,
+    drawnTileId: drawnTile.id,
   };
 }
 
@@ -389,6 +392,7 @@ export function claimKan(state: GameState, playerIdx: number): GameState {
     deadWall: newDeadWall,
     doraIndicators: newDoraIndicators,
     kanCount: state.kanCount + 1,
+    drawnTileId: drawnTile.id,
   };
 }
 
