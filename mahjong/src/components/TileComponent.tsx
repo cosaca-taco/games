@@ -42,7 +42,7 @@ export function TileComponent({ tile, size = 'md', selected, clickable, faceDown
           <span className="tile-number" style={tile.isRed ? { color: '#cc0000' } : undefined}>
             {tile.number}
           </span>
-          <span className="tile-suit-label">{tile.suit}</span>
+          <span className="tile-suit-label">{tile.suit.toUpperCase()}</span>
         </>
       )}
       {tile.isRed && <span className="tile-red-dot">●</span>}
