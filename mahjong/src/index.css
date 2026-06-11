@@ -890,3 +890,218 @@ body.settings-mode {
   font-size: 12px;
   color: #ffcc44;
 }
+
+/* ======================================
+   MOBILE BOARD LAYOUT (mb-*)
+   縦積みレイアウト：CPU3行 + 情報バー + 自分
+   ====================================== */
+
+.mb-board {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  width: 100vw;
+  background: #1a5c2a;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+/* CPU エリア全体 */
+.mb-cpu-area {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 4px 2px;
+  background: rgba(0,0,0,0.2);
+}
+
+/* 各CPUの行 */
+.mb-cpu-strip {
+  background: rgba(0,0,0,0.25);
+  border-radius: 6px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.mb-cpu-strip.mb-cpu-active {
+  background: rgba(255,215,0,0.12);
+  border-color: rgba(255,215,0,0.35);
+}
+
+.mb-cpu-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.mb-wind {
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.mb-name {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.mb-score {
+  font-size: 11px;
+  opacity: 0.85;
+  margin-left: auto;
+}
+
+.mb-riichi-badge {
+  background: #cc2200;
+  color: #fff;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.mb-turn-arrow {
+  color: #ffcc00;
+  font-size: 12px;
+}
+
+.mb-cpu-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.mb-meld-group {
+  display: inline-flex;
+  gap: 1px;
+  margin-right: 4px;
+  background: rgba(255,255,255,0.08);
+  padding: 1px;
+  border-radius: 2px;
+}
+
+.mb-cpu-discards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+}
+
+/* 中央情報バー */
+.mb-center-bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.35);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.mb-round-name {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.mb-info-chip {
+  background: rgba(255,255,255,0.12);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+.mb-dora-label {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* 自分エリア */
+.mb-human-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0,0,0,0.15);
+  border-top: 2px solid rgba(255,255,255,0.15);
+  padding: 4px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mb-human-info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 3px;
+}
+
+.mb-human-discards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  margin-bottom: 3px;
+  min-height: 24px;
+}
+
+.mb-human-melds {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 3px;
+}
+
+.mb-human-hand {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  align-items: flex-end;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mb-hint {
+  font-size: 10px;
+  color: #ffcc44;
+  text-align: center;
+  margin-top: 2px;
+  opacity: 0.85;
+}
+
+/* アクションボタン */
+.mb-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  background: rgba(0,0,0,0.5);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mb-action-btn {
+  min-width: 64px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mb-action-btn:active {
+  opacity: 0.8;
+  transform: scale(0.96);
+}
