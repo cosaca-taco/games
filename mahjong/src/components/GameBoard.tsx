@@ -98,20 +98,20 @@ export const GameBoard: React.FC<Props> = ({
                 {p.melds.map((meld, mi) => (
                   <span key={`m${mi}`} className="mb-meld-group">
                     {meld.tiles.map((t, ti) => (
-                      <TileComponent key={ti} tile={t} size="sm"
+                      <TileComponent key={ti} tile={t} size="xs"
                         faceDown={meld.type === 'closedKan' && (ti === 0 || ti === 3)} />
                     ))}
                   </span>
                 ))}
                 {/* 伏せ牌 */}
                 {p.hand.map((_, hi) => (
-                  <TileComponent key={`h${hi}`} tile={null} faceDown size="sm" />
+                  <TileComponent key={`h${hi}`} tile={null} faceDown size="xs" />
                 ))}
               </div>
               {/* 捨て牌 */}
               <div className="mb-cpu-discards">
                 {p.discards.map((t, di) => (
-                  <TileComponent key={di} tile={t} size="sm" />
+                  <TileComponent key={di} tile={t} size="xs" />
                 ))}
               </div>
             </div>

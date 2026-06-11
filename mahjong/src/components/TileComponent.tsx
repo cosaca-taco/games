@@ -9,7 +9,7 @@ const KANJI_NUM: Record<number, string> = {
 
 interface TileProps {
   tile: Tile | null;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   selected?: boolean;
   clickable?: boolean;
   faceDown?: boolean;
