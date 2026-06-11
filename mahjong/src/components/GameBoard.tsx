@@ -12,7 +12,8 @@ export type GameAction =
   | { type: 'pon' }
   | { type: 'kan' }
   | { type: 'closedKan'; tile: Tile }
-  | { type: 'skip' };
+  | { type: 'skip' }
+  | { type: 'tsumoGiri' };
 
 interface Props {
   gameState: GameState;
@@ -31,10 +32,12 @@ const WIND_KANJI = ['東', '南', '西', '北'];
 const ACTION_LABELS: Record<string, string> = {
   tsumo: '自摸', ron: '栄和', riichi: '立直',
   chi: '吃', pon: '碰', kan: '槓', closedKan: '暗槓', skip: 'スキップ',
+  tsumoGiri: 'ツモ切り',
 };
 const ACTION_COLORS: Record<string, string> = {
   tsumo: '#cc2200', ron: '#cc2200', riichi: '#0044cc',
   chi: '#008800', pon: '#008800', kan: '#886600', closedKan: '#886600', skip: '#555',
+  tsumoGiri: '#555',
 };
 
 export const GameBoard: React.FC<Props> = ({
@@ -68,6 +71,7 @@ export const GameBoard: React.FC<Props> = ({
       case 'closedKan': if (selectedTile) onAction({ type: 'closedKan', tile: selectedTile }); break;
       case 'chi': onAction({ type: 'chi', tiles: [] as unknown as [Tile, Tile] }); break;
       case 'skip': onAction({ type: 'skip' }); break;
+      case 'tsumoGiri': onAction({ type: 'tsumoGiri' }); break;
     }
   };
 

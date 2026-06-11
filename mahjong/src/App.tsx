@@ -42,12 +42,13 @@ function getAvailableActions(gs: GameState): string[] {
   const player = players[0];
 
   if (phase === 'playing' && currentPlayer === 0) {
-    const lastTile = player.hand[player.hand.length - 1];
-    if (lastTile) {
-      const handWithout = player.hand.slice(0, -1);
-      const combos = checkWin(handWithout, player.melds, lastTile);
+    const drawnTile = player.hand.find(t => t.id === gs.drawnTileId);
+    const checkTile = drawnTile ?? player.hand[player.hand.length - 1];
+    if (checkTile) {
+      const handWithout = player.hand.filter(t => t.id !== checkTile.id);
+      const combos = checkWin(handWithout, player.melds, checkTile);
       if (combos) {
-        const ctx = buildYakuContext(gs, 0, lastTile, true);
+        const ctx = buildYakuContext(gs, 0, checkTile, true);
         const allTiles = [...player.hand, ...player.melds.flatMap(m => m.tiles)];
         const yaku = detectYaku(combos[0], allTiles, player.melds, ctx);
         if (yaku.filter(y => !y.name.startsWith('Dora') && !y.name.startsWith('Ura Dora')).length > 0) {
@@ -55,16 +56,23 @@ function getAvailableActions(gs: GameState): string[] {
         }
       }
     }
-    if (!player.isRiichi && player.melds.filter(m => m.type !== 'closedKan').length === 0) {
-      for (const t of player.hand) {
-        if (findShanten(player.hand.filter(tt => tt.id !== t.id), player.melds) === 0) {
-          actions.push('riichi'); break;
+    if (player.isRiichi) {
+      // 立直中：ツモ切りのみ（自摸和以外）
+      if (!actions.includes('tsumo')) {
+        actions.push('tsumoGiri');
+      }
+    } else {
+      if (player.melds.filter(m => m.type !== 'closedKan').length === 0) {
+        for (const t of player.hand) {
+          if (findShanten(player.hand.filter(tt => tt.id !== t.id), player.melds) === 0) {
+            actions.push('riichi'); break;
+          }
         }
       }
-    }
-    for (const t of player.hand) {
-      if (player.hand.filter(tt => tilesEqual(tt, t)).length === 4) {
-        actions.push('closedKan'); break;
+      for (const t of player.hand) {
+        if (player.hand.filter(tt => tilesEqual(tt, t)).length === 4) {
+          actions.push('closedKan'); break;
+        }
       }
     }
   }
@@ -105,6 +113,11 @@ export default function App() {
         case 'kan': return prev.phase === 'claiming' ? claimKan(prev, 0) : prev;
         case 'closedKan': return declareClosedKan(prev, action.tile);
         case 'skip': return skipClaim(prev, 0);
+        case 'tsumoGiri': {
+          // 立直中のツモ切り：ツモ牌をそのまま捨てる
+          const drawnId = prev.drawnTileId ?? prev.players[0].hand[prev.players[0].hand.length - 1]?.id;
+          return drawnId !== undefined ? discardTile(prev, drawnId) : prev;
+        }
         default: return prev;
       }
     });
