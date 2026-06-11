@@ -55,31 +55,14 @@ export function dealTiles(state: GameState): GameState {
   }
   const shuffled = shuffle(allTiles);
 
-  // Dead wall: last 14 tiles
   const deadWall = shuffled.slice(shuffled.length - 14);
-  const wall = shuffled.slice(0, shuffled.length - 14);
+  const dealWall = [...shuffled.slice(0, shuffled.length - 14)];
 
   const doraIndicators = [deadWall[4]];
   const uraDoraIndicators = [deadWall[9]];
 
-  // Deal 13 tiles to each player
-  const players = state.players.map((p, i) => ({
-    ...p,
-    hand: sortHand(wall.splice(0 + i * 0, 13).map((_, idx) => wall[i * 13 + idx] ?? wall[idx])),
-    melds: [],
-    discards: [],
-    isRiichi: false,
-    isDoubleRiichi: false,
-    isTenpai: false,
-    ippatsu: false,
-    riichiTurn: undefined,
-  }));
-
-  // Actually deal sequentially
-  const dealWall = [...shuffled.slice(0, shuffled.length - 14)];
   const dealtPlayers = state.players.map(p => ({ ...p, hand: [] as Tile[], melds: [], discards: [], isRiichi: false, isDoubleRiichi: false, isTenpai: false, ippatsu: false, riichiTurn: undefined }));
 
-  // Deal 4 rounds of 4 tiles, then 1 each
   let wallIdx = 0;
   for (let round = 0; round < 3; round++) {
     for (let p = 0; p < 4; p++) {
@@ -92,14 +75,12 @@ export function dealTiles(state: GameState): GameState {
     dealtPlayers[p].hand.push(dealWall[wallIdx++]);
   }
 
-  // Sort hands
   for (const p of dealtPlayers) {
     p.hand = sortHand(p.hand);
   }
 
   const remainingWall = dealWall.slice(wallIdx);
 
-  // Dealer draws one extra
   const dealerTile = remainingWall.shift()!;
   dealtPlayers[state.dealer].hand.push(dealerTile);
   dealtPlayers[state.dealer].hand = sortHand(dealtPlayers[state.dealer].hand);
@@ -138,7 +119,6 @@ export function discardTile(state: GameState, tileId: number): GameState {
     i === state.currentPlayer ? updatedPlayer : p
   );
 
-  // Check for claims
   const claimState = checkClaims(state, newPlayers, tile, state.currentPlayer);
 
   if (claimState && claimState.possibleActions.length > 0) {
@@ -150,7 +130,6 @@ export function discardTile(state: GameState, tileId: number): GameState {
     };
   }
 
-  // No claims, next player draws
   return advanceTurn(state, newPlayers, state.currentPlayer);
 }
 
@@ -162,7 +141,6 @@ function checkClaims(state: GameState, players: Player[], tile: Tile, fromPlayer
     const player = players[i];
     const possibleActions: ('chi' | 'pon' | 'kan' | 'ron')[] = [];
 
-    // Ron check
     const winCombos = checkWin(player.hand, player.melds, tile);
     if (winCombos) {
       const context = buildYakuContext(state, player, tile, false);
@@ -172,12 +150,10 @@ function checkClaims(state: GameState, players: Player[], tile: Tile, fromPlayer
       }
     }
 
-    // Pon check
     const matching = player.hand.filter(t => tilesEqual(t, tile));
     if (matching.length >= 2) possibleActions.push('pon');
     if (matching.length >= 3) possibleActions.push('kan');
 
-    // Chi check (only next player)
     if ((fromPlayer + 1) % 4 === i && tile.suit !== 'z') {
       if (canChi(player.hand, tile)) possibleActions.push('chi');
     }
@@ -201,18 +177,15 @@ function canChi(hand: Tile[], tile: Tile): boolean {
 }
 
 function isFuriten(player: Player, tile: Tile): boolean {
-  // Check if player discarded this tile
   return player.discards.some(d => tilesEqual(d, tile));
 }
 
 function advanceTurn(state: GameState, players: Player[], currentPlayer: number): GameState {
   const nextPlayer = (currentPlayer + 1) % 4;
 
-  // Cancel ippatsu for everyone
   const updatedPlayers = players.map(p => ({ ...p, ippatsu: false }));
 
   if (state.wall.length === 0) {
-    // Draw
     return handleDraw(state, updatedPlayers);
   }
 
@@ -236,13 +209,11 @@ function advanceTurn(state: GameState, players: Player[], currentPlayer: number)
 }
 
 function handleDraw(state: GameState, players: Player[]): GameState {
-  // Check tenpai for all players
   const updatedPlayers = players.map(p => ({
     ...p,
     isTenpai: findShanten(p.hand, p.melds) === 0,
   }));
 
-  // Point exchanges for tenpai/noten
   const tenpaiPlayers = updatedPlayers.filter(p => p.isTenpai);
   const notenPlayers = updatedPlayers.filter(p => !p.isTenpai);
 
@@ -399,7 +370,6 @@ export function claimKan(state: GameState, playerIdx: number): GameState {
 
   const newHand = player.hand.filter(t => !matching.map(m => m.id).includes(t.id));
 
-  // Draw from dead wall
   const newDeadWall = [...state.deadWall];
   const drawnTile = newDeadWall.pop()!;
   const newDoraIndicators = [...state.doraIndicators, newDeadWall[4 - state.kanCount - 1]].filter(Boolean);
@@ -490,7 +460,6 @@ export function declareWin(state: GameState, playerIdx: number): GameState {
 
   if (yaku.length === 0) return state;
 
-  // Filter out dora-only hands
   const nonDoraYaku = yaku.filter(y => !y.name.startsWith('Dora') && !y.name.startsWith('Ura Dora'));
   if (nonDoraYaku.length === 0) return state;
 
@@ -552,7 +521,6 @@ export function skipClaim(state: GameState, playerIdx: number): GameState {
   const remaining = claimState.possibleActions.filter(a => a.playerId !== playerIdx);
 
   if (remaining.length === 0) {
-    // All skipped, advance turn
     return advanceTurn(state, state.players, claimState.discardedBy);
   }
 
@@ -571,7 +539,6 @@ export function nextRound(state: GameState): GameState {
   let newHonba = state.honba;
 
   if (!lastWin || !dealerWon) {
-    // Dealer rotates
     newDealer = (state.dealer + 1) % 4;
     newRound = newDealer === 0 ? state.round + 1 : state.round;
     newHonba = lastWin ? 0 : state.honba + 1;
@@ -579,18 +546,15 @@ export function nextRound(state: GameState): GameState {
     newHonba = state.honba + 1;
   }
 
-  // Check game end
   const maxRounds = state.settings.gameType === 'east' ? 4 : 8;
   if (newRound > maxRounds) {
     return { ...state, phase: 'gameEnd' };
   }
 
-  // Check if any player is bankrupt
   if (state.players.some(p => p.score < 0)) {
     return { ...state, phase: 'gameEnd' };
   }
 
-  // Rotate seat winds
   const newPlayers = state.players.map((p, i) => {
     const windOffset = (i - newDealer + 4) % 4;
     return { ...p, seatWind: windOffset + 1 };
@@ -611,7 +575,6 @@ export function nextRound(state: GameState): GameState {
   return dealTiles(newState);
 }
 
-// Declare closed kan from hand
 export function declareClosedKan(state: GameState, tile: Tile): GameState {
   const player = state.players[state.currentPlayer];
   const matching = player.hand.filter(t => tilesEqual(t, tile));

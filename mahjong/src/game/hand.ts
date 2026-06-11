@@ -10,7 +10,6 @@ export function sortHand(tiles: Tile[]): Tile[] {
   });
 }
 
-// Count tiles by suit+number
 function countTiles(tiles: Tile[]): Map<string, Tile[]> {
   const map = new Map<string, Tile[]>();
   for (const t of tiles) {
@@ -21,7 +20,6 @@ function countTiles(tiles: Tile[]): Map<string, Tile[]> {
   return map;
 }
 
-// Find all possible win combinations for a set of tiles (no melds)
 function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Tile[] }[] {
   const results: { mentsu: MentsuGroup[]; jantou: Tile[] }[] = [];
 
@@ -34,7 +32,6 @@ function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Ti
     const sorted = sortHand(remaining);
     const first = sorted[0];
 
-    // Try as pair (jantou) only if not yet used
     if (!usedPair) {
       const same = sorted.filter(t => t.suit === first.suit && t.number === first.number);
       if (same.length >= 2) {
@@ -43,7 +40,6 @@ function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Ti
       }
     }
 
-    // Try as koutsu
     const same3 = sorted.filter(t => t.suit === first.suit && t.number === first.number);
     if (same3.length >= 3) {
       const triple = same3.slice(0, 3);
@@ -51,7 +47,6 @@ function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Ti
       tryPair(rest, [...found, { tiles: triple, type: 'koutsu', isOpen: false }], usedPair);
     }
 
-    // Try as shuntsu (only for m,p,s)
     if (first.suit !== 'z') {
       const n2 = sorted.find(t => t.suit === first.suit && t.number === first.number + 1);
       const n3 = sorted.find(t => t.suit === first.suit && t.number === first.number + 2);
@@ -71,7 +66,6 @@ function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Ti
     const sorted = sortHand(remaining);
     const first = sorted[0];
 
-    // koutsu
     const same3 = sorted.filter(t => t.suit === first.suit && t.number === first.number);
     if (same3.length >= 3) {
       const triple = same3.slice(0, 3);
@@ -79,7 +73,6 @@ function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Ti
       tryMentsu(rest, [...foundMentsu, { tiles: triple, type: 'koutsu', isOpen: false }], pair);
     }
 
-    // shuntsu
     if (first.suit !== 'z') {
       const n2 = sorted.find(t => t.suit === first.suit && t.number === first.number + 1);
       const n3 = sorted.find(t => t.suit === first.suit && t.number === first.number + 2);
@@ -90,7 +83,6 @@ function findWinCombinations(tiles: Tile[]): { mentsu: MentsuGroup[]; jantou: Ti
     }
   }
 
-  // Try each tile as the pair start
   const sorted = sortHand(tiles);
   const seen = new Set<string>();
 
@@ -123,7 +115,6 @@ export function checkWin(handTiles: Tile[], melds: Meld[], winTile: Tile): WinCo
   const allTiles = [...handTiles, winTile];
   const results: WinCombination[] = [];
 
-  // Regular hand
   const openMelds: MentsuGroup[] = melds.map(m => ({
     tiles: m.tiles,
     type: m.type === 'chi' ? 'shuntsu' : 'koutsu',
@@ -140,7 +131,6 @@ export function checkWin(handTiles: Tile[], melds: Meld[], winTile: Tile): WinCo
     });
   }
 
-  // Chiitoi (7 pairs, no open melds)
   if (melds.length === 0) {
     const counts = countTiles(allTiles);
     const pairs: Tile[][] = [];
@@ -160,7 +150,6 @@ export function checkWin(handTiles: Tile[], melds: Meld[], winTile: Tile): WinCo
     }
   }
 
-  // Kokushi (no open melds)
   if (melds.length === 0) {
     const terminals = ['m1','m9','p1','p9','s1','s9','z1','z2','z3','z4','z5','z6','z7'];
     const keys = allTiles.map(t => `${t.suit}${t.number}`);
@@ -176,16 +165,10 @@ export function checkWin(handTiles: Tile[], melds: Meld[], winTile: Tile): WinCo
   return results.length > 0 ? results : null;
 }
 
-// Shanten calculation
 export function findShanten(tiles: Tile[], melds: Meld[]): number {
   const allTiles = [...tiles];
-  // add open meld tiles back conceptually — we only calculate on hand tiles
-  // Standard shanten: (4 - melds.length) complete mentsu needed + 1 pair
-  // shanten = 8 - 2*mentsu - max(jantou + partial)
-
   let minShanten = calcRegularShanten(allTiles, melds.length);
 
-  // Chiitoi shanten (only closed)
   if (melds.length === 0) {
     const counts = countTiles(allTiles);
     let pairs = 0;
@@ -198,7 +181,6 @@ export function findShanten(tiles: Tile[], melds: Meld[]): number {
     minShanten = Math.min(minShanten, chitoiShanten);
   }
 
-  // Kokushi shanten
   if (melds.length === 0) {
     const terminals = new Set(['m1','m9','p1','p9','s1','s9','z1','z2','z3','z4','z5','z6','z7']);
     const keys = allTiles.map(t => `${t.suit}${t.number}`);
@@ -213,7 +195,7 @@ export function findShanten(tiles: Tile[], melds: Meld[]): number {
 
 function calcRegularShanten(tiles: Tile[], openMeldCount: number): number {
   const needed = 4 - openMeldCount;
-  let best = needed * 2; // worst case
+  let best = needed * 2;
 
   function search(remaining: Tile[], mentsu: number, partial: number, jantou: number): void {
     const sh = (needed - mentsu) * 2 - partial - jantou - 1;
@@ -224,14 +206,12 @@ function calcRegularShanten(tiles: Tile[], openMeldCount: number): number {
     const sorted = sortHand(remaining);
     const first = sorted[0];
 
-    // As koutsu (complete)
     const sameAll = sorted.filter(t => t.suit === first.suit && t.number === first.number);
     if (sameAll.length >= 3) {
       const rest = removeN(sorted, sameAll.slice(0, 3));
       search(rest, mentsu + 1, partial, jantou);
     }
 
-    // As shuntsu (complete)
     if (first.suit !== 'z') {
       const n2 = sorted.find(t => t.suit === first.suit && t.number === first.number + 1);
       const n3 = sorted.find(t => t.suit === first.suit && t.number === first.number + 2);
@@ -241,15 +221,12 @@ function calcRegularShanten(tiles: Tile[], openMeldCount: number): number {
       }
     }
 
-    // As pair (jantou)
     if (sameAll.length >= 2 && jantou === 0) {
       const rest = removeN(sorted, sameAll.slice(0, 2));
       search(rest, mentsu, partial, 1);
     }
 
-    // As partial kanchan/penchan/consecutive
     if (sameAll.length >= 2 && jantou === 1) {
-      // partial koutsu
       const rest = removeN(sorted, sameAll.slice(0, 2));
       search(rest, mentsu, partial + 1, jantou);
     }
@@ -271,7 +248,6 @@ function calcRegularShanten(tiles: Tile[], openMeldCount: number): number {
   return best;
 }
 
-// Returns array of tile suit*10+number that are winning tiles
 export function findTenpai(tiles: Tile[], melds: Meld[]): number[] {
   if (findShanten(tiles, melds) !== 0) return [];
 

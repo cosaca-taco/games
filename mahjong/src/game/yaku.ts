@@ -48,12 +48,6 @@ export function detectYaku(
     return results;
   }
 
-  // Tenhou / Chihou
-  if (context.isDealer && context.isTsumo && context.isLastTile === false && melds.length === 0) {
-    // tenhou check is done externally
-  }
-
-  // Riichi
   if (context.isDoubleRiichi) {
     results.push({ name: 'Double Riichi', nameJp: 'ダブル立直', han: 2, isYakuman: false });
   } else if (context.isRiichi) {
@@ -64,12 +58,10 @@ export function detectYaku(
     results.push({ name: 'Ippatsu', nameJp: '一発', han: 1, isYakuman: false });
   }
 
-  // Tsumo (closed only)
   if (context.isTsumo && !open) {
     results.push({ name: 'Menzen Tsumo', nameJp: '門前清自摸和', han: 1, isYakuman: false });
   }
 
-  // Haitei / Houtei
   if (context.isHaitei) {
     results.push({ name: 'Haitei', nameJp: '海底摸月', han: 1, isYakuman: false });
   }
@@ -77,12 +69,10 @@ export function detectYaku(
     results.push({ name: 'Houtei', nameJp: '河底撈魚', han: 1, isYakuman: false });
   }
 
-  // Rinshan
   if (context.isRinshan) {
     results.push({ name: 'Rinshan Kaihou', nameJp: '嶺上開花', han: 1, isYakuman: false });
   }
 
-  // Chankan
   if (context.isChankan) {
     results.push({ name: 'Chankan', nameJp: '槍槓', han: 1, isYakuman: false });
   }
@@ -95,16 +85,13 @@ export function detectYaku(
 
   const mentsu = hand.mentsu;
 
-  // Tanyao
   const allSimples = allTiles.every(t => !isTerminalOrHonor(t));
   if (allSimples) {
     if (!open || context.isRiichi === false) {
-      // kuitan handled in engine
       results.push({ name: 'Tanyao', nameJp: '断么九', han: 1, isYakuman: false });
     }
   }
 
-  // Pinfu (closed, all shuntsu, non-yakuhai pair, two-sided wait)
   if (!open) {
     const allShuntsu = mentsu.filter(m => !m.isOpen).every(m => m.type === 'shuntsu');
     const openMentsuCount = mentsu.filter(m => m.isOpen).length;
@@ -121,7 +108,6 @@ export function detectYaku(
     }
   }
 
-  // Iipeiko (closed, two identical shuntsu)
   if (!open) {
     const shuntsuList = mentsu.filter(m => m.type === 'shuntsu');
     let foundIipeiko = false;
@@ -139,7 +125,6 @@ export function detectYaku(
     }
   }
 
-  // Yakuhai
   for (const m of mentsu) {
     if (m.type === 'koutsu' && m.tiles[0].suit === 'z') {
       const n = m.tiles[0].number;
@@ -151,7 +136,6 @@ export function detectYaku(
     }
   }
 
-  // Sanshoku doukou (three koutsu same number different suits)
   {
     const koutsuNums = new Map<number, string[]>();
     for (const m of mentsu) {
@@ -169,7 +153,6 @@ export function detectYaku(
     }
   }
 
-  // Sanshoku doujun (three shuntsu same sequence different suits)
   {
     const shuntsuStarts = new Map<number, string[]>();
     for (const m of mentsu) {
@@ -187,7 +170,6 @@ export function detectYaku(
     }
   }
 
-  // Ittsu (1-2-3, 4-5-6, 7-8-9 in same suit)
   {
     const suitShuntsu: Record<string, number[]> = { m: [], p: [], s: [] };
     for (const m of mentsu) {
@@ -204,7 +186,6 @@ export function detectYaku(
     }
   }
 
-  // Toitoi (all koutsu, open ok)
   {
     const allKoutsu = mentsu.every(m => m.type === 'koutsu');
     if (allKoutsu && mentsu.length >= 4) {
@@ -212,12 +193,10 @@ export function detectYaku(
     }
   }
 
-  // Sanankou (3 concealed koutsu)
   {
     const closedKoutsu = mentsu.filter(m => m.type === 'koutsu' && !m.isOpen).length;
     if (closedKoutsu >= 3) {
       if (closedKoutsu === 4) {
-        // Suuankou
         results.push({ name: 'Suuankou', nameJp: '四暗刻', han: 13, isYakuman: true });
       } else {
         results.push({ name: 'Sanankou', nameJp: '三暗刻', han: 2, isYakuman: false });
@@ -225,7 +204,6 @@ export function detectYaku(
     }
   }
 
-  // Honitsu
   {
     const suits = new Set(allTiles.filter(t => t.suit !== 'z').map(t => t.suit));
     if (suits.size === 1) {
@@ -236,7 +214,6 @@ export function detectYaku(
     }
   }
 
-  // Chinitsu
   {
     const suits = new Set(allTiles.map(t => t.suit));
     if (suits.size === 1 && !suits.has('z')) {
@@ -244,7 +221,6 @@ export function detectYaku(
     }
   }
 
-  // Daisangen (3 dragon koutsu)
   {
     const dragons = mentsu.filter(m => m.type === 'koutsu' && m.tiles[0].suit === 'z' &&
       [5, 6, 7].includes(m.tiles[0].number));
@@ -253,28 +229,24 @@ export function detectYaku(
     }
   }
 
-  // Tsuuiisou (all honors)
   {
     if (allTiles.every(t => t.suit === 'z')) {
       results.push({ name: 'Tsuuiisou', nameJp: '字一色', han: 13, isYakuman: true });
     }
   }
 
-  // Chinroutou (all terminals)
   {
     if (allTiles.every(t => isTerminal(t))) {
       results.push({ name: 'Chinroutou', nameJp: '清老頭', han: 13, isYakuman: true });
     }
   }
 
-  // Ryuuiisou (all green)
   {
     if (allTiles.every(t => isGreen(t))) {
       results.push({ name: 'Ryuuiisou', nameJp: '緑一色', han: 13, isYakuman: true });
     }
   }
 
-  // Chuurenpoutou (1-1-1-2-3-4-5-6-7-8-9-9-9 + 1 more in same suit)
   {
     if (!open && allTiles.every(t => t.suit !== 'z')) {
       const suits = new Set(allTiles.map(t => t.suit));
