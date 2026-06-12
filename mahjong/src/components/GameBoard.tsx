@@ -144,22 +144,22 @@ export const GameBoard: React.FC<Props> = ({
           ))}
         </div>
 
-        {/* 副露 */}
-        {players[0].melds.length > 0 && (
-          <div className="mb-human-melds">
-            {players[0].melds.map((meld, mi) => (
-              <span key={mi} className="mb-meld-group">
-                {meld.tiles.map((t, ti) => (
-                  <TileComponent key={ti} tile={t} size="sm"
-                    faceDown={meld.type === 'closedKan' && (ti === 0 || ti === 3)} />
-                ))}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* 手牌 ＋ ボタン列（横並び） */}
+        {/* 手牌 ＋ 副露 ＋ ボタン列（横並び） */}
         <div className="mb-hand-row">
+          {/* 副露：手牌の左に小さく */}
+          {players[0].melds.length > 0 && (
+            <div className="mb-human-melds-inline">
+              {players[0].melds.map((meld, mi) => (
+                <div key={mi} className="mb-meld-group">
+                  {meld.tiles.map((t, ti) => (
+                    <TileComponent key={ti} tile={t} size="sm"
+                      faceDown={meld.type === 'closedKan' && (ti === 0 || ti === 3)} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* 自分の手牌 */}
           <div className="mb-human-hand">
             {players[0].hand

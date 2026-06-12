@@ -1110,6 +1110,18 @@ body {
   flex-shrink: 0;
 }
 
+/* 副露：手牌行の左端に縦並び */
+.mb-human-melds-inline {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  justify-content: center;
+  padding: 2px 4px 2px 0;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  margin-right: 2px;
+}
+
 /* 手牌 ＋ ボタン縦列の横並びコンテナ */
 .mb-hand-row {
   flex: 1;
