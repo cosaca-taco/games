@@ -102,7 +102,13 @@ export default function App() {
         case 'riichi': return declareRiichi(prev, action.tileId);
         case 'tsumo': return declareWin(prev, 0);
         case 'ron': return declareWin(prev, 0);
-        case 'chi': return claimChi(prev, 0, action.tiles);
+        case 'chi': {
+          const tiles = action.tiles?.length === 2
+            ? action.tiles
+            : prev.claimState ? aiChooseChiTiles(prev.players[0], prev.claimState.discardedTile) : null;
+          if (!tiles) return prev;
+          return claimChi(prev, 0, tiles);
+        }
         case 'pon': return claimPon(prev, 0);
         case 'kan': return prev.phase === 'claiming' ? claimKan(prev, 0) : prev;
         case 'closedKan': return declareClosedKan(prev, action.tile);
