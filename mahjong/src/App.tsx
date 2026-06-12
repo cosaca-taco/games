@@ -136,7 +136,11 @@ export default function App() {
           if (!prev?.claimState) return prev;
           const p = prev.players[pendingAi.playerId];
           const tile = prev.claimState!.discardedTile;
-          if (pendingAi.actions.includes('ron')) return declareWin(prev, pendingAi.playerId);
+          if (pendingAi.actions.includes('ron')) {
+            const afterWin = declareWin(prev, pendingAi.playerId);
+            if (afterWin !== prev) return afterWin;
+            // 役なし（ドラのみ等）なら skip
+          }
           if (pendingAi.actions.includes('kan') && aiShouldClaim(p, tile, 'kan', prev)) return claimKan(prev, pendingAi.playerId);
           if (pendingAi.actions.includes('pon') && aiShouldClaim(p, tile, 'pon', prev)) return claimPon(prev, pendingAi.playerId);
           if (pendingAi.actions.includes('chi') && aiShouldClaim(p, tile, 'chi', prev)) {

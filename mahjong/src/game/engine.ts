@@ -147,7 +147,8 @@ function checkClaims(state: GameState, players: Player[], tile: Tile, fromPlayer
     if (winCombos) {
       const context = buildYakuContext(state, player, tile, false);
       const yaku = detectYakuBest(winCombos, getAllTiles(player.hand, player.melds, tile), player.melds, context);
-      if (yaku.length > 0 && !isFuriten(player, tile)) {
+      const nonDoraYaku = yaku.filter(y => !y.name.startsWith('Dora') && !y.name.startsWith('Ura Dora'));
+      if (nonDoraYaku.length > 0 && !isFuriten(player, tile)) {
         possibleActions.push('ron');
       }
     }
