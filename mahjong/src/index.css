@@ -1056,13 +1056,13 @@ body.settings-mode {
   flex-shrink: 0;
 }
 
-/* 自分の捨て牌：横スクロール・2行分まで */
+/* 自分の捨て牌：2行分まで表示（tile-smは30px高さ、2行=63px） */
 .mb-human-discards {
   display: flex;
   flex-wrap: wrap;
   gap: 1px;
   margin-bottom: 2px;
-  max-height: 44px;
+  max-height: 63px;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -1075,16 +1075,16 @@ body.settings-mode {
   flex-shrink: 0;
 }
 
-/* 自分の手牌：flex:1で残りを全部使い、横スクロール */
+/* 自分の手牌：折り返し2行表示（横スクロールなし） */
 .mb-human-hand {
   flex: 1;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 3px;
-  align-items: center;
-  overflow-x: auto;
+  align-items: flex-start;
+  align-content: flex-start;
+  overflow: hidden;
   padding: 4px 2px;
-  -webkit-overflow-scrolling: touch;
 }
 
 .mb-hint {
