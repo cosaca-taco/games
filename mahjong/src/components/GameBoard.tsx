@@ -94,7 +94,6 @@ export const GameBoard: React.FC<Props> = ({
                 {isCurrent && <span className="mb-turn-arrow">▶</span>}
               </div>
               <div className="mb-cpu-tiles">
-                {/* 副露 */}
                 {p.melds.map((meld, mi) => (
                   <span key={`m${mi}`} className="mb-meld-group">
                     {meld.tiles.map((t, ti) => (
@@ -103,12 +102,10 @@ export const GameBoard: React.FC<Props> = ({
                     ))}
                   </span>
                 ))}
-                {/* 伏せ牌 */}
                 {p.hand.map((_, hi) => (
                   <TileComponent key={`h${hi}`} tile={null} faceDown size="xs" />
                 ))}
               </div>
-              {/* 捨て牌 */}
               <div className="mb-cpu-discards">
                 {p.discards.map((t, di) => (
                   <TileComponent key={di} tile={t} size="xs" />
@@ -143,7 +140,7 @@ export const GameBoard: React.FC<Props> = ({
         {/* 自分の捨て牌 */}
         <div className="mb-human-discards">
           {players[0].discards.map((t, i) => (
-            <TileComponent key={i} tile={t} size="xs" />
+            <TileComponent key={i} tile={t} size="sm" />
           ))}
         </div>
 

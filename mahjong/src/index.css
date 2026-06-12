@@ -904,61 +904,67 @@ body.settings-mode {
   flex-direction: column;
   height: 100dvh;
   width: 100vw;
-  background: #1a5c2a;
+  background: #14471e;
   overflow: hidden;
   font-family: inherit;
 }
 
-/* CPU エリア全体：高さを固定して自分エリアを圧迫しない */
+/* CPU エリア全体 */
 .mb-cpu-area {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 3px 4px 2px;
-  background: rgba(0,0,0,0.2);
+  gap: 1px;
+  padding: 4px 6px 3px;
+  background: rgba(0,0,0,0.3);
+  border-bottom: 1px solid rgba(0,0,0,0.4);
 }
 
-/* 各CPUの行：高さ固定 */
+/* 各CPUの行 */
 .mb-cpu-strip {
-  background: rgba(0,0,0,0.25);
-  border-radius: 4px;
-  padding: 2px 5px;
-  border: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 5px;
+  padding: 3px 6px;
+  border: 1px solid rgba(255,255,255,0.07);
   overflow: hidden;
 }
 
 .mb-cpu-strip.mb-cpu-active {
-  background: rgba(255,215,0,0.12);
-  border-color: rgba(255,215,0,0.35);
+  background: rgba(255,215,0,0.1);
+  border-color: rgba(255,215,0,0.4);
 }
 
 .mb-cpu-info {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-bottom: 2px;
-  line-height: 1;
+  gap: 3px;
+  flex-shrink: 0;
+  min-width: 80px;
 }
 
 .mb-wind {
-  background: rgba(255,255,255,0.2);
-  border-radius: 2px;
-  padding: 0 3px;
-  font-size: 10px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 11px;
   font-weight: bold;
   flex-shrink: 0;
+  line-height: 1.4;
 }
 
 .mb-name {
   font-size: 10px;
   font-weight: bold;
+  opacity: 0.9;
 }
 
 .mb-score {
   font-size: 10px;
-  opacity: 0.85;
-  margin-left: auto;
+  opacity: 0.7;
+  margin-left: 2px;
 }
 
 .mb-riichi-badge {
@@ -968,43 +974,45 @@ body.settings-mode {
   padding: 0 3px;
   font-size: 9px;
   font-weight: bold;
+  margin-left: 2px;
 }
 
 .mb-turn-arrow {
   color: #ffcc00;
-  font-size: 10px;
+  font-size: 11px;
+  margin-left: 2px;
 }
 
-/* CPU手牌（伏せ）：横一列で高さ固定 */
+/* CPU手牌（伏せ）：横一列 */
 .mb-cpu-tiles {
   display: flex;
   flex-wrap: nowrap;
   gap: 1px;
   align-items: center;
-  margin-bottom: 1px;
-  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .mb-meld-group {
   display: inline-flex;
   gap: 1px;
   margin-right: 3px;
-  background: rgba(255,255,255,0.08);
-  padding: 1px;
+  background: rgba(255,255,255,0.1);
+  padding: 1px 2px;
   border-radius: 2px;
 }
 
-/* CPU捨て牌：横スクロールで高さ1行分のみ */
+/* CPU捨て牌：横スクロール1行 */
 .mb-cpu-discards {
   display: flex;
   flex-wrap: nowrap;
   gap: 1px;
   overflow-x: auto;
   overflow-y: hidden;
-  height: 18px;
   align-items: center;
+  flex: 1;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  min-width: 0;
 }
 .mb-cpu-discards::-webkit-scrollbar { display: none; }
 
@@ -1013,28 +1021,31 @@ body.settings-mode {
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: rgba(0,0,0,0.35);
-  font-size: 12px;
-  flex-wrap: wrap;
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(0,0,0,0.5);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .mb-round-name {
   font-size: 13px;
   font-weight: bold;
+  color: #ffdd88;
 }
 
 .mb-info-chip {
-  background: rgba(255,255,255,0.12);
-  border-radius: 3px;
-  padding: 1px 5px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 1px 7px;
   font-size: 11px;
+  color: rgba(255,255,255,0.8);
 }
 
 .mb-dora-label {
   font-size: 11px;
-  opacity: 0.7;
+  opacity: 0.6;
+  margin-left: auto;
 }
 
 /* 自分エリア：残りスペースを全部使う */
@@ -1042,9 +1053,9 @@ body.settings-mode {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(0,0,0,0.15);
-  border-top: 2px solid rgba(255,255,255,0.2);
-  padding: 4px 4px 2px;
+  background: linear-gradient(180deg, #1a5c2a 0%, #1c6030 100%);
+  border-top: 2px solid rgba(255,255,255,0.12);
+  padding: 5px 6px 3px;
   min-height: 0;
   overflow: hidden;
 }
@@ -1053,85 +1064,95 @@ body.settings-mode {
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   flex-shrink: 0;
 }
 
-/* 自分の捨て牌：2行分まで表示（tile-xsは20px高さ、2行=42px） */
+/* 自分の捨て牌エリア：「川」スタイル */
 .mb-human-discards {
   display: flex;
   flex-wrap: wrap;
-  gap: 1px;
-  margin-bottom: 2px;
-  max-height: 42px;
+  gap: 2px;
+  padding: 4px 6px;
+  margin-bottom: 4px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(0,0,0,0.3);
+  max-height: 72px;   /* sm 30px × 2行 + gap + padding */
   overflow: hidden;
   flex-shrink: 0;
+  align-content: flex-start;
 }
 
 .mb-human-melds {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   flex-shrink: 0;
 }
 
-/* 自分の手牌：折り返し2行表示（横スクロールなし） */
+/* 自分の手牌：折り返し、残りスペースを使う */
 .mb-human-hand {
   flex: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 3px;
-  align-items: flex-start;
-  align-content: flex-start;
+  align-items: center;
+  align-content: center;
   overflow: hidden;
-  padding: 4px 2px;
+  padding: 6px 4px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.08);
+  justify-content: center;
 }
 
 .mb-hint {
-  font-size: 10px;
+  font-size: 11px;
   color: #ffcc44;
   text-align: center;
-  margin-top: 2px;
-  opacity: 0.85;
+  margin-top: 3px;
+  flex-shrink: 0;
 }
 
 /* アクションボタン */
 .mb-actions {
   flex: 0 0 auto;
   display: flex;
-  gap: 6px;
+  gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
-  padding: 6px 8px;
-  background: rgba(0,0,0,0.5);
-  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 7px 10px;
+  background: rgba(0,0,0,0.55);
+  border-top: 1px solid rgba(255,255,255,0.08);
 }
 
 .mb-action-btn {
-  min-width: 64px;
+  min-width: 68px;
   min-height: 44px;
   padding: 8px 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   color: #fff;
   font-size: 15px;
   font-weight: bold;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.5);
   -webkit-tap-highlight-color: transparent;
+  letter-spacing: 0.5px;
 }
 
 .mb-action-btn:active {
   opacity: 0.8;
-  transform: scale(0.96);
+  transform: scale(0.95);
 }
 
 /* ツモ牌の区切り */
 .mb-tsumo-sep {
   display: inline-block;
-  width: 8px;
+  width: 10px;
   flex-shrink: 0;
 }
 
