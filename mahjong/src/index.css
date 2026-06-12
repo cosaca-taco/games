@@ -73,9 +73,10 @@ body {
 }
 
 .tile-selected {
-  transform: translateY(-8px);
-  box-shadow: 1px 8px 10px rgba(0,0,0,0.7);
+  transform: translateY(-10px);
+  box-shadow: 1px 10px 12px rgba(0,0,0,0.7);
   border-color: #ffcc00;
+  border-width: 2px;
 }
 
 .tile-face-down {

@@ -169,7 +169,7 @@ export const GameBoard: React.FC<Props> = ({
               <TileComponent
                 key={tile.id}
                 tile={tile}
-                size="md"
+                size="lg"
                 selected={selectedTile?.id === tile.id}
                 onClick={() => handleTileClick(tile)}
               />
@@ -181,7 +181,7 @@ export const GameBoard: React.FC<Props> = ({
                 <span className="mb-tsumo-sep" />
                 <TileComponent
                   tile={drawn}
-                  size="md"
+                  size="lg"
                   selected={selectedTile?.id === drawn.id}
                   onClick={() => handleTileClick(drawn)}
                 />
