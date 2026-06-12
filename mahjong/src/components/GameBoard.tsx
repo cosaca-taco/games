@@ -137,41 +137,6 @@ export const GameBoard: React.FC<Props> = ({
           {currentPlayer === 0 && <span className="mb-turn-arrow">▶</span>}
         </div>
 
-        {/* アクションボタン：捨て牌の上に横並び */}
-        {(() => {
-          const isMyTurn = phase === 'playing' && currentPlayer === 0;
-          const isClaiming = phase === 'claiming';
-          const inRiichi = players[0].isRiichi;
-          const canRiichiWithSelected = selectedTile && isMyTurn && !inRiichi
-            && players[0].melds.filter(m => m.type !== 'closedKan').length === 0
-            && findShanten(players[0].hand.filter(t => t.id !== selectedTile.id), players[0].melds) === 0;
-          const showButtons = availableActions.length > 0 || (selectedTile && isMyTurn) || isClaiming;
-          if (!showButtons) return null;
-          return (
-            <div className="mb-action-row">
-              {availableActions.map(action => (
-                <button key={action} className="mb-action-btn"
-                  style={{ backgroundColor: ACTION_COLORS[action] || '#444' }}
-                  onClick={() => handleActionBtn(action)}>
-                  {ACTION_LABELS[action] || action}
-                </button>
-              ))}
-              {selectedTile && isMyTurn && !inRiichi && (
-                <button className="mb-action-btn" style={{ backgroundColor: '#884400' }}
-                  onClick={() => { onAction({ type: 'discard', tileId: selectedTile.id }); onTileSelect(null); }}>
-                  捨てる
-                </button>
-              )}
-              {canRiichiWithSelected && (
-                <button className="mb-action-btn" style={{ backgroundColor: '#0044cc' }}
-                  onClick={() => { onAction({ type: 'riichi', tileId: selectedTile.id }); onTileSelect(null); }}>
-                  立直
-                </button>
-              )}
-            </div>
-          );
-        })()}
-
         {/* 自分の捨て牌 */}
         <div className="mb-human-discards">
           {players[0].discards.map((t, i) => (
@@ -193,25 +158,63 @@ export const GameBoard: React.FC<Props> = ({
           </div>
         )}
 
-        {/* 自分の手牌 */}
-        <div className="mb-human-hand">
-          {players[0].hand
-            .filter(tile => tile.id !== gameState.drawnTileId)
-            .map(tile => (
-              <TileComponent key={tile.id} tile={tile} size="md"
-                selected={selectedTile?.id === tile.id}
-                onClick={() => handleTileClick(tile)} />
-            ))}
-          {gameState.drawnTileId !== undefined && (() => {
-            const drawn = players[0].hand.find(t => t.id === gameState.drawnTileId);
-            return drawn ? (
-              <>
-                <span className="mb-tsumo-sep" />
-                <TileComponent tile={drawn} size="md"
-                  selected={selectedTile?.id === drawn.id}
-                  onClick={() => handleTileClick(drawn)} />
-              </>
-            ) : null;
+        {/* 手牌 ＋ ボタン列（横並び） */}
+        <div className="mb-hand-row">
+          {/* 自分の手牌 */}
+          <div className="mb-human-hand">
+            {players[0].hand
+              .filter(tile => tile.id !== gameState.drawnTileId)
+              .map(tile => (
+                <TileComponent key={tile.id} tile={tile} size="md"
+                  selected={selectedTile?.id === tile.id}
+                  onClick={() => handleTileClick(tile)} />
+              ))}
+            {gameState.drawnTileId !== undefined && (() => {
+              const drawn = players[0].hand.find(t => t.id === gameState.drawnTileId);
+              return drawn ? (
+                <>
+                  <span className="mb-tsumo-sep" />
+                  <TileComponent tile={drawn} size="md"
+                    selected={selectedTile?.id === drawn.id}
+                    onClick={() => handleTileClick(drawn)} />
+                </>
+              ) : null;
+            })()}
+          </div>
+
+          {/* 右側ボタン縦列 */}
+          {(() => {
+            const isMyTurn = phase === 'playing' && currentPlayer === 0;
+            const isClaiming = phase === 'claiming';
+            const inRiichi = players[0].isRiichi;
+            const canRiichiWithSelected = selectedTile && isMyTurn && !inRiichi
+              && players[0].melds.filter(m => m.type !== 'closedKan').length === 0
+              && findShanten(players[0].hand.filter(t => t.id !== selectedTile.id), players[0].melds) === 0;
+            const showButtons = availableActions.length > 0 || (selectedTile && isMyTurn) || isClaiming;
+            if (!showButtons) return null;
+            return (
+              <div className="mb-action-col">
+                {availableActions.map(action => (
+                  <button key={action} className="mb-action-btn"
+                    style={{ backgroundColor: ACTION_COLORS[action] || '#444' }}
+                    onClick={() => handleActionBtn(action)}>
+                    {ACTION_LABELS[action] || action}
+                  </button>
+                ))}
+                {selectedTile && isMyTurn && !inRiichi && (
+                  <button className="mb-action-btn" style={{ backgroundColor: '#884400' }}
+                    onClick={() => { onAction({ type: 'discard', tileId: selectedTile.id }); onTileSelect(null); }}>
+                    捨てる
+                  </button>
+                )}
+                {canRiichiWithSelected && (
+                  <button className="mb-action-btn" style={{ backgroundColor: '#0044cc' }}
+                    onClick={() => { onAction({ type: 'riichi', tileId: selectedTile.id }); onTileSelect(null); }}>
+                    立直
+                  </button>
+                )}
+              </div>
+            );
           })()}
         </div>
       </div>
