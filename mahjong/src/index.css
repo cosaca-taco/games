@@ -1057,13 +1057,13 @@ body.settings-mode {
   flex-shrink: 0;
 }
 
-/* 自分の捨て牌：2行分まで表示（tile-smは30px高さ、2行=63px） */
+/* 自分の捨て牌：2行分まで表示（tile-xsは20px高さ、2行=42px） */
 .mb-human-discards {
   display: flex;
   flex-wrap: wrap;
   gap: 1px;
   margin-bottom: 2px;
-  max-height: 63px;
+  max-height: 42px;
   overflow: hidden;
   flex-shrink: 0;
 }

@@ -143,7 +143,7 @@ export const GameBoard: React.FC<Props> = ({
         {/* 自分の捨て牌 */}
         <div className="mb-human-discards">
           {players[0].discards.map((t, i) => (
-            <TileComponent key={i} tile={t} size="sm" />
+            <TileComponent key={i} tile={t} size="xs" />
           ))}
         </div>
 
@@ -169,7 +169,7 @@ export const GameBoard: React.FC<Props> = ({
               <TileComponent
                 key={tile.id}
                 tile={tile}
-                size="lg"
+                size="md"
                 selected={selectedTile?.id === tile.id}
                 onClick={() => handleTileClick(tile)}
               />
@@ -181,7 +181,7 @@ export const GameBoard: React.FC<Props> = ({
                 <span className="mb-tsumo-sep" />
                 <TileComponent
                   tile={drawn}
-                  size="lg"
+                  size="md"
                   selected={selectedTile?.id === drawn.id}
                   onClick={() => handleTileClick(drawn)}
                 />
