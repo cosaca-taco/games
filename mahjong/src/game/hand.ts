@@ -198,7 +198,13 @@ function calcRegularShanten(tiles: Tile[], openMeldCount: number): number {
   let best = needed * 2;
 
   function search(remaining: Tile[], mentsu: number, partial: number, jantou: number): void {
-    const sh = (needed - mentsu) * 2 - partial - jantou - 1;
+    const cap = needed - mentsu;
+    // 残り枠を超えて partial+jantou を数えないようにキャップ
+    let p = Math.min(partial, cap);
+    const j = jantou;
+    if (p + j > cap) p = cap - j;
+    if (p < 0) p = 0;
+    const sh = cap * 2 - p - j - 1;
     best = Math.min(best, sh);
 
     if (remaining.length === 0) return;
