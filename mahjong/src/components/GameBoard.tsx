@@ -165,7 +165,7 @@ export const GameBoard: React.FC<Props> = ({
             {players[0].hand
               .filter(tile => tile.id !== gameState.drawnTileId)
               .map(tile => (
-                <TileComponent key={tile.id} tile={tile} size="lg"
+                <TileComponent key={tile.id} tile={tile} size="ml"
                   selected={selectedTile?.id === tile.id}
                   onClick={() => handleTileClick(tile)} />
               ))}
@@ -174,7 +174,7 @@ export const GameBoard: React.FC<Props> = ({
               return drawn ? (
                 <>
                   <span className="mb-tsumo-sep" />
-                  <TileComponent tile={drawn} size="lg"
+                  <TileComponent tile={drawn} size="ml"
                     selected={selectedTile?.id === drawn.id}
                     onClick={() => handleTileClick(drawn)} />
                 </>
