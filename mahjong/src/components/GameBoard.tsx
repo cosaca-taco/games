@@ -158,92 +158,83 @@ export const GameBoard: React.FC<Props> = ({
           </div>
         )}
 
-        {/* 自分の手牌：ツモ牌を右端に分離 */}
-        <div className="mb-human-hand">
-          {players[0].hand
-            .filter(tile => tile.id !== gameState.drawnTileId)
-            .map(tile => (
-              <TileComponent
-                key={tile.id}
-                tile={tile}
-                size="md"
-                selected={selectedTile?.id === tile.id}
-                onClick={() => handleTileClick(tile)}
-              />
-            ))}
-          {gameState.drawnTileId !== undefined && (() => {
-            const drawn = players[0].hand.find(t => t.id === gameState.drawnTileId);
-            return drawn ? (
-              <>
-                <span className="mb-tsumo-sep" />
+        {/* 手牌 + ボタン を横並び */}
+        <div className="mb-hand-row">
+          {/* 自分の手牌：ツモ牌を右端に分離 */}
+          <div className="mb-human-hand">
+            {players[0].hand
+              .filter(tile => tile.id !== gameState.drawnTileId)
+              .map(tile => (
                 <TileComponent
-                  tile={drawn}
+                  key={tile.id}
+                  tile={tile}
                   size="md"
-                  selected={selectedTile?.id === drawn.id}
-                  onClick={() => handleTileClick(drawn)}
+                  selected={selectedTile?.id === tile.id}
+                  onClick={() => handleTileClick(tile)}
                 />
-              </>
-            ) : null;
+              ))}
+            {gameState.drawnTileId !== undefined && (() => {
+              const drawn = players[0].hand.find(t => t.id === gameState.drawnTileId);
+              return drawn ? (
+                <>
+                  <span className="mb-tsumo-sep" />
+                  <TileComponent
+                    tile={drawn}
+                    size="md"
+                    selected={selectedTile?.id === drawn.id}
+                    onClick={() => handleTileClick(drawn)}
+                  />
+                </>
+              ) : null;
+            })()}
+          </div>
+
+          {/* 右側ボタン列 */}
+          {(() => {
+            const isMyTurn = phase === 'playing' && currentPlayer === 0;
+            const isClaiming = phase === 'claiming';
+            const inRiichi = players[0].isRiichi;
+            const canRiichiWithSelected = selectedTile && isMyTurn && !inRiichi
+              && players[0].melds.filter(m => m.type !== 'closedKan').length === 0
+              && findShanten(players[0].hand.filter(t => t.id !== selectedTile.id), players[0].melds) === 0;
+            const showButtons = availableActions.length > 0 || (selectedTile && isMyTurn) || isClaiming;
+            if (!showButtons) return null;
+
+            return (
+              <div className="mb-action-col">
+                {availableActions.map(action => (
+                  <button
+                    key={action}
+                    className="mb-action-btn"
+                    style={{ backgroundColor: ACTION_COLORS[action] || '#444' }}
+                    onClick={() => handleActionBtn(action)}
+                  >
+                    {ACTION_LABELS[action] || action}
+                  </button>
+                ))}
+                {selectedTile && isMyTurn && !inRiichi && (
+                  <button
+                    className="mb-action-btn"
+                    style={{ backgroundColor: '#884400' }}
+                    onClick={() => { onAction({ type: 'discard', tileId: selectedTile.id }); onTileSelect(null); }}
+                  >
+                    捨てる
+                  </button>
+                )}
+                {canRiichiWithSelected && (
+                  <button
+                    className="mb-action-btn"
+                    style={{ backgroundColor: '#0044cc' }}
+                    onClick={() => { onAction({ type: 'riichi', tileId: selectedTile.id }); onTileSelect(null); }}
+                  >
+                    立直
+                  </button>
+                )}
+              </div>
+            );
           })()}
         </div>
-
-        {selectedTile && phase === 'playing' && currentPlayer === 0 && !players[0].isRiichi && (
-          <div className="mb-hint">もう一度タップで捨てる　または「捨てる」ボタン</div>
-        )}
       </div>
-
-      {/* アクションボタン：選択状態や局面に応じて表示 */}
-      {(() => {
-        const isMyTurn = phase === 'playing' && currentPlayer === 0;
-        const isClaiming = phase === 'claiming';
-        const inRiichi = players[0].isRiichi;
-
-        // 選択牌が立直可能か判定
-        const canRiichiWithSelected = selectedTile && isMyTurn && !inRiichi
-          && players[0].melds.filter(m => m.type !== 'closedKan').length === 0
-          && findShanten(players[0].hand.filter(t => t.id !== selectedTile.id), players[0].melds) === 0;
-
-        const showBar = availableActions.length > 0 || (selectedTile && isMyTurn) || isClaiming;
-        if (!showBar) return null;
-
-        return (
-          <div className="mb-actions">
-            {/* 自摸・ツモ切り・暗槓など常時ボタン */}
-            {availableActions.map(action => (
-              <button
-                key={action}
-                className="mb-action-btn"
-                style={{ backgroundColor: ACTION_COLORS[action] || '#444' }}
-                onClick={() => handleActionBtn(action)}
-              >
-                {ACTION_LABELS[action] || action}
-              </button>
-            ))}
-
-            {/* 牌選択時：捨てるボタン */}
-            {selectedTile && isMyTurn && !inRiichi && (
-              <button
-                className="mb-action-btn"
-                style={{ backgroundColor: '#884400' }}
-                onClick={() => { onAction({ type: 'discard', tileId: selectedTile.id }); onTileSelect(null); }}
-              >
-                捨てる
-              </button>
-            )}
-
-            {/* 牌選択時：その牌で立直可能なら立直ボタン */}
-            {canRiichiWithSelected && (
-              <button
-                className="mb-action-btn"
-                style={{ backgroundColor: '#0044cc' }}
-                onClick={() => { onAction({ type: 'riichi', tileId: selectedTile.id }); onTileSelect(null); }}
-              >
-                立直
-              </button>
-            )}
-          </div>
-        );
-      })()}
     </div>
   );
 };
