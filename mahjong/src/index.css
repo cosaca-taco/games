@@ -537,6 +537,17 @@ body {
   background: #0055ee;
 }
 
+.game-end-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.play-again-btn {
+  background: linear-gradient(135deg, #cc2200, #aa1100) !important;
+}
+
 .final-rankings {
   margin: 10px 0;
 }

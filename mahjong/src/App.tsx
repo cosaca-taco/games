@@ -197,6 +197,13 @@ export default function App() {
     });
   }, []);
 
+  const handlePlayAgain = useCallback(() => {
+    setGameState(prev => {
+      if (!prev) return null;
+      return dealTiles(initGame(prev.settings));
+    });
+  }, []);
+
   if (appPhase === 'settings') return <SettingsScreen onStart={handleStart} />;
   if (!gameState) return null;
 
@@ -216,6 +223,7 @@ export default function App() {
           winResult={gameState.lastWin}
           players={gameState.players}
           onNext={handleNext}
+          onPlayAgain={handlePlayAgain}
           isGameEnd={gameState.phase === 'gameEnd'}
         />
       )}

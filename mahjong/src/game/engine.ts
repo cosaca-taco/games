@@ -153,12 +153,15 @@ function checkClaims(state: GameState, players: Player[], tile: Tile, fromPlayer
       }
     }
 
-    const matching = player.hand.filter(t => tilesEqual(t, tile));
-    if (matching.length >= 2) possibleActions.push('pon');
-    if (matching.length >= 3) possibleActions.push('kan');
+    // 立直中は碰・吃・槓不可（栄和のみ）
+    if (!player.isRiichi) {
+      const matching = player.hand.filter(t => tilesEqual(t, tile));
+      if (matching.length >= 2) possibleActions.push('pon');
+      if (matching.length >= 3) possibleActions.push('kan');
 
-    if ((fromPlayer + 1) % 4 === i && tile.suit !== 'z') {
-      if (canChi(player.hand, tile)) possibleActions.push('chi');
+      if ((fromPlayer + 1) % 4 === i && tile.suit !== 'z') {
+        if (canChi(player.hand, tile)) possibleActions.push('chi');
+      }
     }
 
     if (possibleActions.length > 0) {

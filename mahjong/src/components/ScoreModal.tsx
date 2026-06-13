@@ -7,12 +7,12 @@ interface Props {
   players: Player[];
   onNext: () => void;
   isGameEnd: boolean;
+  onPlayAgain?: () => void;
 }
 
-export const ScoreModal: React.FC<Props> = ({ winResult, players, onNext, isGameEnd }) => {
+export const ScoreModal: React.FC<Props> = ({ winResult, players, onNext, isGameEnd, onPlayAgain }) => {
   const winner = players[winResult.winner];
   const yakuman = winResult.yaku.some(y => y.isYakuman);
-
   const sorted = isGameEnd ? [...players].sort((a, b) => b.score - a.score) : [];
 
   return (
@@ -30,6 +30,14 @@ export const ScoreModal: React.FC<Props> = ({ winResult, players, onNext, isGame
                 </div>
               ))}
             </div>
+            <div className="game-end-buttons">
+              <button className="next-btn play-again-btn" onClick={onPlayAgain}>
+                もう一度プレイ
+              </button>
+              <button className="next-btn" onClick={onNext}>
+                設定に戻る
+              </button>
+            </div>
           </>
         ) : (
           <>
@@ -37,11 +45,9 @@ export const ScoreModal: React.FC<Props> = ({ winResult, players, onNext, isGame
               <h2>{winner.name}の{winResult.isTsumo ? '自摸和' : '栄和'}!</h2>
               {yakuman && <div className="yakuman-badge">役満</div>}
             </div>
-
             <div className="win-tile-display">
               <TileComponent tile={winResult.winTile} size="lg" />
             </div>
-
             <div className="yaku-list">
               {winResult.yaku.map((y, i) => (
                 <div key={i} className={`yaku-row ${y.isYakuman ? 'yaku-yakuman' : ''}`}>
@@ -50,14 +56,12 @@ export const ScoreModal: React.FC<Props> = ({ winResult, players, onNext, isGame
                 </div>
               ))}
             </div>
-
             {!yakuman && (
               <div className="han-fu-display">
                 <span>{winResult.han}翻{winResult.fu}符</span>
                 <span className="total-points">{winResult.points.toLocaleString()}点</span>
               </div>
             )}
-
             <div className="point-changes">
               {players.map((p, i) => (
                 <div key={p.id} className={`point-change ${winResult.pointChanges[i] > 0 ? 'positive' : winResult.pointChanges[i] < 0 ? 'negative' : ''}`}>
@@ -67,12 +71,9 @@ export const ScoreModal: React.FC<Props> = ({ winResult, players, onNext, isGame
                 </div>
               ))}
             </div>
+            <button className="next-btn" onClick={onNext}>次の局へ</button>
           </>
         )}
-
-        <button className="next-btn" onClick={onNext}>
-          {isGameEnd ? 'タイトルへ' : '次の局へ'}
-        </button>
       </div>
     </div>
   );
