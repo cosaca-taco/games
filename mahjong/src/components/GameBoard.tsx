@@ -16,6 +16,20 @@ export type GameAction =
   | { type: 'skip' }
   | { type: 'tsumoGiri' };
 
+type HandTileSize = 'xs' | 'sm' | 'ml' | 'md' | 'lg';
+
+const TILE_SIZE_MAP: Record<string, HandTileSize> = {
+  S: 'sm',
+  M: 'ml',
+  L: 'lg',
+};
+
+const DISCARD_SIZE_MAP: Record<string, HandTileSize> = {
+  S: 'xs',
+  M: 'sm',
+  L: 'sm',
+};
+
 interface Props {
   gameState: GameState;
   onAction: (action: GameAction) => void;
@@ -45,6 +59,8 @@ export const GameBoard: React.FC<Props> = ({
   gameState, onAction, selectedTile, onTileSelect, availableActions,
 }) => {
   const { players, round, honba, riichiSticks, wall, currentPlayer, phase } = gameState;
+  const handSize = TILE_SIZE_MAP[gameState.settings.tileSize ?? 'M'];
+  const discardSize = DISCARD_SIZE_MAP[gameState.settings.tileSize ?? 'M'];
   const doraActual = gameState.doraIndicators.map(d => getDoraFromIndicator(d));
 
   // CPU表示順: 上(2)、右(1)、左(3)
@@ -140,7 +156,7 @@ export const GameBoard: React.FC<Props> = ({
         {/* 自分の捨て牌 */}
         <div className="mb-human-discards">
           {players[0].discards.map((t, i) => (
-            <TileComponent key={i} tile={t} size="sm" />
+            <TileComponent key={i} tile={t} size={discardSize} />
           ))}
         </div>
 
@@ -152,7 +168,7 @@ export const GameBoard: React.FC<Props> = ({
               {players[0].melds.map((meld, mi) => (
                 <div key={mi} className="mb-meld-group">
                   {meld.tiles.map((t, ti) => (
-                    <TileComponent key={ti} tile={t} size="sm"
+                    <TileComponent key={ti} tile={t} size={discardSize}
                       faceDown={meld.type === 'closedKan' && (ti === 0 || ti === 3)} />
                   ))}
                 </div>
@@ -165,7 +181,7 @@ export const GameBoard: React.FC<Props> = ({
             {players[0].hand
               .filter(tile => tile.id !== gameState.drawnTileId)
               .map(tile => (
-                <TileComponent key={tile.id} tile={tile} size="ml"
+                <TileComponent key={tile.id} tile={tile} size={handSize}
                   selected={selectedTile?.id === tile.id}
                   onClick={() => handleTileClick(tile)} />
               ))}
@@ -174,7 +190,7 @@ export const GameBoard: React.FC<Props> = ({
               return drawn ? (
                 <>
                   <span className="mb-tsumo-sep" />
-                  <TileComponent tile={drawn} size="ml"
+                  <TileComponent tile={drawn} size={handSize}
                     selected={selectedTile?.id === drawn.id}
                     onClick={() => handleTileClick(drawn)} />
                 </>

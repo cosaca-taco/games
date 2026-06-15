@@ -16,6 +16,7 @@ export const SettingsScreen: React.FC<Props> = ({ onStart }) => {
     kuitan: true,
     gameType: 'east',
     difficulty: 'normal',
+    tileSize: 'M',
   });
 
   const toggle = (key: 'redDora' | 'kuitan') => {
@@ -52,6 +53,19 @@ export const SettingsScreen: React.FC<Props> = ({ onStart }) => {
                 <option value="normal">普通</option>
                 <option value="strong">強い</option>
                 <option value="veryStrong">最強</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="settings-group">
+            <h3>表示設定</h3>
+            <label className="settings-row">
+              <span>牌のサイズ</span>
+              <select value={settings.tileSize}
+                onChange={e => setSettings(s => ({ ...s, tileSize: e.target.value as 'S' | 'M' | 'L' }))}>
+                <option value="S">小（小さい画面向け）</option>
+                <option value="M">中（標準）</option>
+                <option value="L">大（大きい画面向け）</option>
               </select>
             </label>
           </div>

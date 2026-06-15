@@ -34,6 +34,7 @@ export interface GameSettings {
   kuitan: boolean;
   gameType: 'east' | 'hanchan';
   difficulty: 'normal' | 'strong' | 'veryStrong';
+  tileSize: 'S' | 'M' | 'L';
 }
 
 export type GamePhase = 'settings' | 'dealing' | 'playing' | 'claiming' | 'roundEnd' | 'gameEnd';
