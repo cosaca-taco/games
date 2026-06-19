@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Food Analysis - Strategic Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0c0e12;
+            --card-bg: #1a1d23;
+            --accent-color: #deff9a;
+            --text-main: #f5f5f5;
+            --text-sub: #daffde;
+            --shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        body, html {
+            margin: 0; padding: 0; background-color: #000;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; font-family: 'Urbanist', 'Noto Sans JP', sans-serif; color: var(--text-main);
+        }
+
+        .slide-container {
+            width: 100%; max-width: 1280px; min-height: 720px; background-color: var(--bg-color);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (min-width: 992px) { .slide-container { flex-direction: row; height: 720px; } }
+
+        .bg-blob { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(222,255,154,0.05) 0%, rgba(0,0,0,0) 70%); z-index: 0; }
+        .blob-1 { top: -200px; right: -200px; }
+        .blob-2 { bottom: -200px; left: -200px; }
+
+        .screen { display: none; width: 100%; height: 100%; min-height: 720px; z-index: 1; box-sizing: border-box; }
+        .screen.active { display: flex; }
+
+        .screen-home {
+            flex-direction: column; justify-content: center; align-items: center;
+            background-image: linear-gradient(rgba(12,14,18,0.7), rgba(12,14,18,0.9)), url('https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=1280&q=80');
+            background-size: cover; background-position: center; text-align: center; padding: 20px;
+        }
+
+        .hero-title { font-size: 64px; font-weight: 700; margin: 0; letter-spacing: -2px; line-height: 1.1; }
+        @media (min-width: 768px) { .hero-title { font-size: 82px; } }
+        .hero-title span { color: var(--accent-color); }
+        .hero-subtitle { font-size: 16px; color: var(--text-sub); margin-top: 20px; letter-spacing: 4px; text-transform: uppercase; }
+
+        .upload-btn {
+            margin-top: 50px; padding: 18px 45px; background: rgba(222,255,154,0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--accent-color); color: var(--accent-color); border-radius: 50px; font-size: 18px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 15px;
+        }
+        .upload-btn:hover { background: var(--accent-color); color: #000; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(222,255,154,0.3); }
+
+        .screen-loading { flex-direction: column; justify-content: center; align-items: center; z-index: 2; }
+        .loader { width: 60px; height: 60px; border: 4px solid rgba(222,255,154,0.1); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .screen-result { flex-direction: column; width: 100%; z-index: 2; }
+        @media (min-width: 992px) { .screen-result { flex-direction: row; height: 100%; } }
+
+        .result-visual { flex: 1; padding: 30px; display: flex; justify-content: center; align-items: center; box-sizing: border-box; background-color: rgba(0,0,0,0.2); }
+        .image-wrapper { position: relative; display: inline-block; max-width: 100%; max-height: 400px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(222,255,154,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        @media (min-width: 992px) { .image-wrapper { max-height: 540px; } }
+        .image-wrapper img { display: block; max-width: 100%; max-height: 400px; object-fit: contain; }
+        @media (min-width: 992px) { .image-wrapper img { max-height: 540px; } }
+
+        .result-dashboard { flex: 1; padding: 40px; background-color: var(--card-bg); display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; position: relative; }
+        @media (min-width: 992px) { .result-dashboard { padding: 40px 40px 40px 40px; border-top: none; border-left: 1px solid rgba(255,255,255,0.05); overflow-y: auto; height: 100%; } }
+
+        .metric-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .metric-title { color: var(--text-sub); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; }
+        .timestamp-badge { font-size: 13px; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .metric-value { font-size: 72px; font-weight: 700; color: var(--accent-color); line-height: 1; margin-top: 5px; }
+        @media (min-width: 768px) { .metric-value { font-size: 82px; } }
+        .metric-unit { font-size: 24px; margin-left: 10px; }
+
+        .pfc-dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .pfc-card { background: rgba(255,255,255,0.02); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); }
+        .pfc-card-label { font-size: 13px; color: var(--text-sub); margin-bottom: 5px; }
+        .pfc-card-value { font-size: 24px; font-weight: 700; }
+        .pfc-card-value span { font-size: 13px; margin-left: 2px; }
+        .progress-container { width: 100%; height: 4px; background: rgba(255,255,255,0.1); margin-top: 12px; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; border-radius: 2px; transition: width 0.5s ease-out; }
+
+        .menu-list { margin-top: 10px; margin-bottom: 20px; }
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .menu-item-left { display: flex; flex-direction: column; gap: 5px; }
+        .menu-item-name { font-weight: 500; font-size: 18px; color: var(--text-main); }
+        
+        .quantity-controller { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.03); padding: 4px 10px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); width: fit-content; }
+        .ctrl-btn { background: none; border: none; color: var(--text-main); cursor: pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; transition: all 0.2s; }
+        .ctrl-btn:hover { background: rgba(222,255,154,0.2); color: var(--accent-color); }
+        .quantity-display { font-size: 14px; font-weight: 700; min-width: 45px; text-align: center; color: var(--accent-color); }
+        .menu-item-info { color: var(--text-sub); font-size: 14px; text-align: right; font-weight: bold; }
+
+        .advice-box { background: rgba(222,255,154,0.05); border: 1px dashed rgba(222,255,154,0.2); padding: 15px; border-radius: 12px; margin-bottom: 25px; color: #daffde; font-size: 14px; line-height: 1.6; }
+        .advice-box i { color: var(--accent-color); margin-right: 8px; }
+
+        .action-area { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 20px; }
+        .reset-btn-link { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 8px; opacity: 0.6; transition: opacity 0.3s; cursor: pointer; }
+        .reset-btn-link:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<div class="slide-container">
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+
+    <div id="screen-home" class="screen screen-home active">
+        <h1 class="hero-title">Strategic<br>Food <span>Analysis</span></h1>
+        <p class="hero-subtitle">Visual Intelligence for Nutrition Management</p>
+        <input type="file" id="file-input" accept="image/*" style="display: none;">
+        <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+            <i class="fa-solid fa-camera"></i> 食事の写真を撮影・アップロード
+        </button>
+    </div>
+
+    <div id="screen-loading" class="screen screen-loading">
+        <div class="loader"></div>
+        <p style="margin-top: 30px; letter-spacing: 3px; color: #deff9a; font-weight: bold;">ANALYZING NUTRITION...</p>
+    </div>
+
+    <div id="screen-result" class="screen screen-result">
+        <div class="result-visual">
+            <div class="image-wrapper">
+                <img id="result-image" src="" alt="Preview">
+            </div>
+        </div>
+        <div class="result-dashboard">
+            <div class="metric-header">
+                <div>
+                    <span class="metric-title">Total Energy</span>
+                    <div class="metric-value"><span id="val-calories">0</span><span class="metric-unit">kcal</span></div>
+                </div>
+                <div class="timestamp-badge"><i class="fa-regular fa-clock" style="margin-right: 6px;"></i><span id="val-time"></span></div>
+            </div>
+
+            <div class="pfc-dashboard">
+                <div class="pfc-card">
+                    <div class="pfc-card-label">タンパク質</div>
+                    <div class="pfc-card-value"><span id="val-protein">0</span><span>g</span></div>
+                    <div class="progress-container"><div id="bar-protein" class="progress-fill" style="background-color: #36A2EB;"></div></div>
+                </div>
+                <div class="pfc-card">
+                    <div class="pfc-card-label">脂質</div>
+                    <div class="pfc-card-value"><span id="val-fat">0</span><span>g</span></div>
+                    <div class="progress-container"><div id="bar-fat" class="progress-fill" style="background-color: #FFCE56;"></div></div>
+                </div>
+                <div class="pfc-card">
+                    <div class="pfc-card-label">炭水化物</div>
+                    <div class="pfc-card-value"><span id="val-carbs">0</span><span>g</span></div>
+                    <div class="progress-container"><div id="bar-carbs" class="progress-fill" style="background-color: #FF6384;"></div></div>
+                </div>
+            </div>
+
+            <div class="metric-title" style="margin-bottom: 5px;">Menu Breakdown & Adjustment</div>
+            <div class="menu-list">
+                <div class="menu-item">
+                    <div class="menu-item-left">
+                        <div id="val-menuname" class="menu-item-name">分析された料理</div>
+                        <div class="quantity-controller">
+                            <button class="ctrl-btn" onclick="updateScale(-0.1)"><i class="fa-solid fa-minus"></i></button>
+                            <div id="val-scale" class="quantity-display">1.0 人前</div>
+                            <button class="ctrl-btn" onclick="updateScale(0.1)"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    </div>
+                    <div class="menu-item-info"><span id="sub-calories" style="color: #deff9a; font-size: 16px;">0 kcal</span></div>
+                </div>
+            </div>
+
+            <div id="advice-box" class="advice-box">
+                <i class="fa-solid fa-comment-medical"></i>
+                <strong>AI栄養士のアドバイス:</strong><br>
+                <span id="val-advice"></span>
+            </div>
+
+            <div class="action-area">
+                <div class="reset-btn-link" onclick="resetApp()"><i class="fa-solid fa-arrow-rotate-left"></i> 別の写真を解析する</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 💡 tacoさんが見つけてくださった正しいCloud RunエンドポイントURL
+    const FUNCTIONS_URL = "https://analyze-roxfc7qfga-uc.a.run.app";
+    let rawResult = null;
+    let currentScale = 1.0;
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            document.getElementById('result-image').src = reader.result;
+            analyzeImage(reader.result);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    async function analyzeImage(fullBase64String) {
+        showScreen('screen-loading');
+        
+        // 「data:image/jpeg;base64,」の部分をカットして純粋なデータのみにする
+        const base64Data = fullBase64String.split(',')[1];
+        
+        try {
+            // 💡 標準的なJSON形式で、型崩れなくCloud Runへポスト
+            const response = await fetch(FUNCTIONS_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: base64Data })
+            });
+
+            if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`サーバーエラー (${response.status})\n${errText}`);
+            }
+
+            let data = await response.json();
+            rawResult = data;
+            currentScale = 1.0;
+            
+            renderResult();
+            showScreen('screen-result');
+
+        } catch (error) {
+            alert(error.message);
+            resetApp();
+        }
+    }
+
+    function renderResult() {
+        if (!rawResult) return;
+
+        const p = Number(((rawResult.protein || 0) * currentScale).toFixed(1));
+        const f = Number(((rawResult.fat || 0) * currentScale).toFixed(1));
+        const c = Number(((rawResult.carbohydrates || rawResult.carbohydrate || 0) * currentScale).toFixed(1));
+        const cal = Math.round((rawResult.calories || 0) * currentScale);
+
+        const totalPFC = (p + f + c) || 1;
+
+        document.getElementById('val-calories').innerText = cal;
+        document.getElementById('sub-calories').innerText = `${cal} kcal`;
+        document.getElementById('val-protein').innerText = p;
+        document.getElementById('val-fat').innerText = f;
+        document.getElementById('val-carbs').innerText = c;
+        document.getElementById('val-menuname').innerText = rawResult.menuName || "料理";
+        document.getElementById('val-advice').innerText = rawResult.advice || "アドバイスはありません。";
+        document.getElementById('val-scale').innerText = `${currentScale.toFixed(1)} 人前`;
+
+        document.getElementById('bar-protein').style.width = `${Math.round((p / totalPFC) * 100)}%`;
+        document.getElementById('bar-fat').style.width = `${Math.round((f / totalPFC) * 100)}%`;
+        document.getElementById('bar-carbs').style.width = `${Math.round((c / totalPFC) * 100)}%`;
+
+        const now = new Date();
+        document.getElementById('val-time').innerText = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function updateScale(delta) {
+        currentScale = Math.max(0.1, Math.min(5.0, Number((currentScale + delta).toFixed(1))));
+        renderResult();
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function resetApp() {
+        document.getElementById('file-input').value = "";
+        rawResult = null;
+        showScreen('screen-home');
+    }
+</script>
+
+</body>
+</html>
