@@ -102,12 +102,9 @@
         .food-box { position: absolute; border: 2px solid var(--accent-color); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0); }
         .food-box-label { position: absolute; top: -26px; left: -2px; background: var(--accent-color); color: #000; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
 
-        .menu-item-box { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.02); }
-        .menu-item-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .menu-item-box-name { font-weight: 500; font-size: 16px; color: var(--text-main); }
+        .menu-item-box { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .menu-item-box-name { font-weight: 500; font-size: 16px; color: var(--text-main); margin-bottom: 6px; }
         .menu-item-box-cal { font-weight: 700; font-size: 15px; color: var(--accent-color); }
-        .menu-item-box-macros { display: flex; gap: 16px; font-size: 13px; color: var(--text-sub); }
-        .menu-item-box-macros span b { color: var(--text-main); font-weight: 700; }
 
         .advice-box { background: rgba(222,255,154,0.05); border: 1px dashed rgba(222,255,154,0.2); padding: 15px; border-radius: 12px; margin-bottom: 25px; color: #daffde; font-size: 14px; line-height: 1.6; }
         .advice-box i { color: var(--accent-color); margin-right: 8px; }
@@ -172,14 +169,6 @@
             </div>
 
             <div class="metric-title" style="margin-bottom: 5px;">Menu Breakdown & Adjustment</div>
-            <div class="menu-item" style="border-bottom: none; padding-top: 4px;">
-                <div class="quantity-controller">
-                    <button class="ctrl-btn" onclick="updateScale(-0.1)"><i class="fa-solid fa-minus"></i></button>
-                    <div id="val-scale" class="quantity-display">1.0 人前</div>
-                    <button class="ctrl-btn" onclick="updateScale(0.1)"><i class="fa-solid fa-plus"></i></button>
-                </div>
-                <div class="menu-item-info"><span id="sub-calories" style="color: #deff9a; font-size: 16px;">0 kcal</span></div>
-            </div>
             <div id="menu-items-list" class="menu-list"></div>
 
             <div id="advice-box" class="advice-box">
@@ -199,7 +188,7 @@
     // 💡 tacoさんが見つけてくださった正しいCloud RunエンドポイントURL
     const FUNCTIONS_URL = "https://analyze-roxfc7qfga-uc.a.run.app";
     let rawResult = null;
-    let currentScale = 1.0;
+    let itemScales = [];
 
     document.getElementById('file-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
@@ -236,8 +225,9 @@
 
             let data = await response.json();
             rawResult = data;
-            currentScale = 1.0;
-            
+            const items = Array.isArray(rawResult.items) ? rawResult.items : [];
+            itemScales = items.map(() => 1.0);
+
             showScreen('screen-result');
             renderResult();
 
@@ -260,28 +250,31 @@
                 carbohydrates: rawResult.carbohydrates || rawResult.carbohydrate || 0,
             }];
 
-        const totals = items.reduce((acc, item) => {
-            acc.calories += item.calories || 0;
-            acc.protein += item.protein || 0;
-            acc.fat += item.fat || 0;
-            acc.carbohydrates += item.carbohydrates || item.carbohydrate || 0;
+        if (itemScales.length !== items.length) {
+            itemScales = items.map(() => 1.0);
+        }
+
+        const totals = items.reduce((acc, item, i) => {
+            const scale = itemScales[i] || 1.0;
+            acc.calories += (item.calories || 0) * scale;
+            acc.protein += (item.protein || 0) * scale;
+            acc.fat += (item.fat || 0) * scale;
+            acc.carbohydrates += (item.carbohydrates || item.carbohydrate || 0) * scale;
             return acc;
         }, { calories: 0, protein: 0, fat: 0, carbohydrates: 0 });
 
-        const p = Number((totals.protein * currentScale).toFixed(1));
-        const f = Number((totals.fat * currentScale).toFixed(1));
-        const c = Number((totals.carbohydrates * currentScale).toFixed(1));
-        const cal = Math.round(totals.calories * currentScale);
+        const p = Number(totals.protein.toFixed(1));
+        const f = Number(totals.fat.toFixed(1));
+        const c = Number(totals.carbohydrates.toFixed(1));
+        const cal = Math.round(totals.calories);
 
         const totalPFC = (p + f + c) || 1;
 
         document.getElementById('val-calories').innerText = cal;
-        document.getElementById('sub-calories').innerText = `${cal} kcal`;
         document.getElementById('val-protein').innerText = p;
         document.getElementById('val-fat').innerText = f;
         document.getElementById('val-carbs').innerText = c;
         document.getElementById('val-advice').innerText = rawResult.advice || "アドバイスはありません。";
-        document.getElementById('val-scale').innerText = `${currentScale.toFixed(1)} 人前`;
 
         document.getElementById('bar-protein').style.width = `${Math.round((p / totalPFC) * 100)}%`;
         document.getElementById('bar-fat').style.width = `${Math.round((f / totalPFC) * 100)}%`;
@@ -291,39 +284,42 @@
 
         const listEl = document.getElementById('menu-items-list');
         listEl.innerHTML = "";
-        items.forEach(item => {
-            const itemCal = Math.round((item.calories || 0) * currentScale);
-            const itemP = Number(((item.protein || 0) * currentScale).toFixed(1));
-            const itemF = Number(((item.fat || 0) * currentScale).toFixed(1));
-            const itemC = Number(((item.carbohydrates || item.carbohydrate || 0) * currentScale).toFixed(1));
+        items.forEach((item, i) => {
+            const scale = itemScales[i] || 1.0;
+            const itemCal = Math.round((item.calories || 0) * scale);
 
             const box = document.createElement('div');
             box.className = 'menu-item-box';
 
-            const header = document.createElement('div');
-            header.className = 'menu-item-box-header';
-
+            const left = document.createElement('div');
             const name = document.createElement('div');
             name.className = 'menu-item-box-name';
             name.textContent = item.name || "料理";
-
             const calSpan = document.createElement('div');
             calSpan.className = 'menu-item-box-cal';
             calSpan.textContent = `${itemCal} kcal`;
+            left.appendChild(name);
+            left.appendChild(calSpan);
 
-            header.appendChild(name);
-            header.appendChild(calSpan);
+            const controller = document.createElement('div');
+            controller.className = 'quantity-controller';
+            const minusBtn = document.createElement('button');
+            minusBtn.className = 'ctrl-btn';
+            minusBtn.innerHTML = '<i class="fa-solid fa-minus"></i>';
+            minusBtn.onclick = () => updateItemScale(i, -0.1);
+            const display = document.createElement('div');
+            display.className = 'quantity-display';
+            display.textContent = `${scale.toFixed(1)} 人前`;
+            const plusBtn = document.createElement('button');
+            plusBtn.className = 'ctrl-btn';
+            plusBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+            plusBtn.onclick = () => updateItemScale(i, 0.1);
+            controller.appendChild(minusBtn);
+            controller.appendChild(display);
+            controller.appendChild(plusBtn);
 
-            const macros = document.createElement('div');
-            macros.className = 'menu-item-box-macros';
-            macros.innerHTML = `
-                <span>タンパク質 <b>${itemP}</b>g</span>
-                <span>脂質 <b>${itemF}</b>g</span>
-                <span>炭水化物 <b>${itemC}</b>g</span>
-            `;
-
-            box.appendChild(header);
-            box.appendChild(macros);
+            box.appendChild(left);
+            box.appendChild(controller);
             listEl.appendChild(box);
         });
 
@@ -392,8 +388,9 @@
         if (rawResult) drawFoodBoxes(Array.isArray(rawResult.items) ? rawResult.items : []);
     });
 
-    function updateScale(delta) {
-        currentScale = Math.max(0.1, Math.min(5.0, Number((currentScale + delta).toFixed(1))));
+    function updateItemScale(index, delta) {
+        const current = itemScales[index] || 1.0;
+        itemScales[index] = Math.max(0.1, Math.min(5.0, Number((current + delta).toFixed(1))));
         renderResult();
     }
 
