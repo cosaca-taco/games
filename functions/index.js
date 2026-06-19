@@ -18,13 +18,17 @@ exports.analyze = onRequest({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
 
-    const prompt = `与えられた食事の画像を分析し、以下のjsonフォーマットでのみ結果を返してください。余計なテキストは一切含めないでください。
+    const prompt = `与えられた食事の画像を分析し、写っている料理・食品を種類ごとに分けて、以下のjsonフォーマットでのみ結果を返してください。余計なテキストは一切含めないでください。
 {
-  "menuName": "料理の名前",
-  "calories": 推定総カロリー,
-  "protein": 推定タンパク質量,
-  "fat": 推定脂質量,
-  "carbohydrates": 推定炭水化物量,
+  "items": [
+    {
+      "name": "料理・食品の名前",
+      "calories": 推定カロリー,
+      "protein": 推定タンパク質量,
+      "fat": 推定脂質量,
+      "carbohydrates": 推定炭水化物量
+    }
+  ],
   "advice": "栄養士としてのアドバイス"
 }`;
 

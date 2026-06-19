@@ -98,6 +98,13 @@
         .quantity-display { font-size: 14px; font-weight: 700; min-width: 45px; text-align: center; color: var(--accent-color); }
         .menu-item-info { color: var(--text-sub); font-size: 14px; text-align: right; font-weight: bold; }
 
+        .menu-item-box { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.02); }
+        .menu-item-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .menu-item-box-name { font-weight: 500; font-size: 16px; color: var(--text-main); }
+        .menu-item-box-cal { font-weight: 700; font-size: 15px; color: var(--accent-color); }
+        .menu-item-box-macros { display: flex; gap: 16px; font-size: 13px; color: var(--text-sub); }
+        .menu-item-box-macros span b { color: var(--text-main); font-weight: 700; }
+
         .advice-box { background: rgba(222,255,154,0.05); border: 1px dashed rgba(222,255,154,0.2); padding: 15px; border-radius: 12px; margin-bottom: 25px; color: #daffde; font-size: 14px; line-height: 1.6; }
         .advice-box i { color: var(--accent-color); margin-right: 8px; }
 
@@ -160,19 +167,15 @@
             </div>
 
             <div class="metric-title" style="margin-bottom: 5px;">Menu Breakdown & Adjustment</div>
-            <div class="menu-list">
-                <div class="menu-item">
-                    <div class="menu-item-left">
-                        <div id="val-menuname" class="menu-item-name">分析された料理</div>
-                        <div class="quantity-controller">
-                            <button class="ctrl-btn" onclick="updateScale(-0.1)"><i class="fa-solid fa-minus"></i></button>
-                            <div id="val-scale" class="quantity-display">1.0 人前</div>
-                            <button class="ctrl-btn" onclick="updateScale(0.1)"><i class="fa-solid fa-plus"></i></button>
-                        </div>
-                    </div>
-                    <div class="menu-item-info"><span id="sub-calories" style="color: #deff9a; font-size: 16px;">0 kcal</span></div>
+            <div class="menu-item" style="border-bottom: none; padding-top: 4px;">
+                <div class="quantity-controller">
+                    <button class="ctrl-btn" onclick="updateScale(-0.1)"><i class="fa-solid fa-minus"></i></button>
+                    <div id="val-scale" class="quantity-display">1.0 人前</div>
+                    <button class="ctrl-btn" onclick="updateScale(0.1)"><i class="fa-solid fa-plus"></i></button>
                 </div>
+                <div class="menu-item-info"><span id="sub-calories" style="color: #deff9a; font-size: 16px;">0 kcal</span></div>
             </div>
+            <div id="menu-items-list" class="menu-list"></div>
 
             <div id="advice-box" class="advice-box">
                 <i class="fa-solid fa-comment-medical"></i>
@@ -242,10 +245,28 @@
     function renderResult() {
         if (!rawResult) return;
 
-        const p = Number(((rawResult.protein || 0) * currentScale).toFixed(1));
-        const f = Number(((rawResult.fat || 0) * currentScale).toFixed(1));
-        const c = Number(((rawResult.carbohydrates || rawResult.carbohydrate || 0) * currentScale).toFixed(1));
-        const cal = Math.round((rawResult.calories || 0) * currentScale);
+        const items = Array.isArray(rawResult.items) && rawResult.items.length > 0
+            ? rawResult.items
+            : [{
+                name: rawResult.menuName || "料理",
+                calories: rawResult.calories || 0,
+                protein: rawResult.protein || 0,
+                fat: rawResult.fat || 0,
+                carbohydrates: rawResult.carbohydrates || rawResult.carbohydrate || 0,
+            }];
+
+        const totals = items.reduce((acc, item) => {
+            acc.calories += item.calories || 0;
+            acc.protein += item.protein || 0;
+            acc.fat += item.fat || 0;
+            acc.carbohydrates += item.carbohydrates || item.carbohydrate || 0;
+            return acc;
+        }, { calories: 0, protein: 0, fat: 0, carbohydrates: 0 });
+
+        const p = Number((totals.protein * currentScale).toFixed(1));
+        const f = Number((totals.fat * currentScale).toFixed(1));
+        const c = Number((totals.carbohydrates * currentScale).toFixed(1));
+        const cal = Math.round(totals.calories * currentScale);
 
         const totalPFC = (p + f + c) || 1;
 
@@ -254,13 +275,50 @@
         document.getElementById('val-protein').innerText = p;
         document.getElementById('val-fat').innerText = f;
         document.getElementById('val-carbs').innerText = c;
-        document.getElementById('val-menuname').innerText = rawResult.menuName || "料理";
         document.getElementById('val-advice').innerText = rawResult.advice || "アドバイスはありません。";
         document.getElementById('val-scale').innerText = `${currentScale.toFixed(1)} 人前`;
 
         document.getElementById('bar-protein').style.width = `${Math.round((p / totalPFC) * 100)}%`;
         document.getElementById('bar-fat').style.width = `${Math.round((f / totalPFC) * 100)}%`;
         document.getElementById('bar-carbs').style.width = `${Math.round((c / totalPFC) * 100)}%`;
+
+        const listEl = document.getElementById('menu-items-list');
+        listEl.innerHTML = "";
+        items.forEach(item => {
+            const itemCal = Math.round((item.calories || 0) * currentScale);
+            const itemP = Number(((item.protein || 0) * currentScale).toFixed(1));
+            const itemF = Number(((item.fat || 0) * currentScale).toFixed(1));
+            const itemC = Number(((item.carbohydrates || item.carbohydrate || 0) * currentScale).toFixed(1));
+
+            const box = document.createElement('div');
+            box.className = 'menu-item-box';
+
+            const header = document.createElement('div');
+            header.className = 'menu-item-box-header';
+
+            const name = document.createElement('div');
+            name.className = 'menu-item-box-name';
+            name.textContent = item.name || "料理";
+
+            const calSpan = document.createElement('div');
+            calSpan.className = 'menu-item-box-cal';
+            calSpan.textContent = `${itemCal} kcal`;
+
+            header.appendChild(name);
+            header.appendChild(calSpan);
+
+            const macros = document.createElement('div');
+            macros.className = 'menu-item-box-macros';
+            macros.innerHTML = `
+                <span>タンパク質 <b>${itemP}</b>g</span>
+                <span>脂質 <b>${itemF}</b>g</span>
+                <span>炭水化物 <b>${itemC}</b>g</span>
+            `;
+
+            box.appendChild(header);
+            box.appendChild(macros);
+            listEl.appendChild(box);
+        });
 
         const now = new Date();
         document.getElementById('val-time').innerText = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
