@@ -198,34 +198,22 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        const reader = new FileReader();
-        reader.onloadend = async function() {
-            const tempImg = new Image();
-            tempImg.src = reader.result;
-
-            try {
-                if (tempImg.decode) {
-                    await tempImg.decode();
-                } else {
-                    await new Promise((resolve, reject) => {
-                        tempImg.onload = resolve;
-                        tempImg.onerror = reject;
-                    });
-                }
-
-                const jpegDataUrl = normalizeToJpeg(tempImg);
-                document.getElementById('result-image').src = jpegDataUrl;
-                analyzeImage(jpegDataUrl);
-            } catch (err) {
-                alert("この画像形式は表示できません。JPEGまたはPNG形式の写真をお試しください。");
-            }
-        };
-        reader.readAsDataURL(file);
+        try {
+            const jpegDataUrl = await fileToJpegDataUrl(file);
+            document.getElementById('result-image').src = jpegDataUrl;
+            analyzeImage(jpegDataUrl);
+        } catch (err) {
+            console.error(err);
+            alert("この画像形式は表示できません。JPEGまたはPNG形式の写真をお試しください。");
+        }
     });
 
-    function normalizeToJpeg(img) {
+    async function fileToJpegDataUrl(file) {
         const MAX_DIMENSION = 1600;
-        let { naturalWidth: w, naturalHeight: h } = img;
+
+        const bitmap = await createImageBitmap(file);
+        let w = bitmap.width;
+        let h = bitmap.height;
 
         if (Math.max(w, h) > MAX_DIMENSION) {
             const ratio = MAX_DIMENSION / Math.max(w, h);
@@ -239,7 +227,8 @@
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0, w, h);
+        ctx.drawImage(bitmap, 0, 0, w, h);
+        bitmap.close();
 
         return canvas.toDataURL('image/jpeg', 0.9);
     }
