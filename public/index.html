@@ -194,22 +194,31 @@
     let rawResult = null;
     let itemScales = [];
 
-    document.getElementById('file-input').addEventListener('change', function(e) {
+    document.getElementById('file-input').addEventListener('change', async function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onloadend = function() {
+        reader.onloadend = async function() {
             const tempImg = new Image();
-            tempImg.onload = function() {
+            tempImg.src = reader.result;
+
+            try {
+                if (tempImg.decode) {
+                    await tempImg.decode();
+                } else {
+                    await new Promise((resolve, reject) => {
+                        tempImg.onload = resolve;
+                        tempImg.onerror = reject;
+                    });
+                }
+
                 const jpegDataUrl = normalizeToJpeg(tempImg);
                 document.getElementById('result-image').src = jpegDataUrl;
                 analyzeImage(jpegDataUrl);
-            };
-            tempImg.onerror = function() {
+            } catch (err) {
                 alert("この画像形式は表示できません。JPEGまたはPNG形式の写真をお試しください。");
-            };
-            tempImg.src = reader.result;
+            }
         };
         reader.readAsDataURL(file);
     });
