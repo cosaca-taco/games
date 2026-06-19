@@ -6,7 +6,8 @@
     <title>AI Food Analysis - Strategic Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;700&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         :root {
             --bg-color: #0c0e12;
@@ -391,53 +392,35 @@
         if (rawResult) drawFoodBoxes(Array.isArray(rawResult.items) ? rawResult.items : []);
     });
 
-    function saveResultImage() {
-        const img = document.getElementById('result-image');
-        if (!img.naturalWidth || !rawResult) return;
+    async function saveResultImage() {
+        if (!rawResult) return;
 
-        const items = Array.isArray(rawResult.items) ? rawResult.items : [];
+        const target = document.getElementById('screen-result');
+        const dashboard = target.querySelector('.result-dashboard');
+        const saveLink = document.querySelector('.save-btn-link');
 
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        saveLink.style.visibility = 'hidden';
+        const prevOverflow = dashboard.style.overflowY;
+        const prevHeight = dashboard.style.height;
+        dashboard.style.overflowY = 'visible';
+        dashboard.style.height = 'auto';
 
-        const lineWidth = Math.max(2, canvas.width * 0.004);
-        const fontSize = Math.max(14, canvas.width * 0.022);
-        const labelH = fontSize * 1.7;
+        try {
+            const canvas = await html2canvas(target, {
+                backgroundColor: '#0c0e12',
+                scale: 2,
+                useCORS: true,
+            });
 
-        items.forEach(item => {
-            const box = item.box;
-            if (!box) return;
-
-            const x = (box.x || 0) * canvas.width;
-            const y = (box.y || 0) * canvas.height;
-            const w = (box.width || 0) * canvas.width;
-            const h = (box.height || 0) * canvas.height;
-            if (w <= 0 || h <= 0) return;
-
-            ctx.strokeStyle = '#deff9a';
-            ctx.lineWidth = lineWidth;
-            ctx.strokeRect(x, y, w, h);
-
-            const label = item.name || "料理";
-            ctx.font = `bold ${fontSize}px 'Urbanist', 'Noto Sans JP', sans-serif`;
-            const textW = ctx.measureText(label).width;
-            const padding = fontSize * 0.5;
-
-            ctx.fillStyle = '#deff9a';
-            ctx.fillRect(x - lineWidth / 2, y - labelH, textW + padding * 2, labelH);
-
-            ctx.fillStyle = '#000';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, x - lineWidth / 2 + padding, y - labelH / 2);
-        });
-
-        const link = document.createElement('a');
-        link.download = 'food-analysis.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+            const link = document.createElement('a');
+            link.download = 'food-analysis.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        } finally {
+            dashboard.style.overflowY = prevOverflow;
+            dashboard.style.height = prevHeight;
+            saveLink.style.visibility = 'visible';
+        }
     }
 
     function updateItemScale(index, delta) {
