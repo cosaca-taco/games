@@ -200,11 +200,40 @@
 
         const reader = new FileReader();
         reader.onloadend = function() {
-            document.getElementById('result-image').src = reader.result;
-            analyzeImage(reader.result);
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                const jpegDataUrl = normalizeToJpeg(tempImg);
+                document.getElementById('result-image').src = jpegDataUrl;
+                analyzeImage(jpegDataUrl);
+            };
+            tempImg.onerror = function() {
+                alert("この画像形式は表示できません。JPEGまたはPNG形式の写真をお試しください。");
+            };
+            tempImg.src = reader.result;
         };
         reader.readAsDataURL(file);
     });
+
+    function normalizeToJpeg(img) {
+        const MAX_DIMENSION = 1600;
+        let { naturalWidth: w, naturalHeight: h } = img;
+
+        if (Math.max(w, h) > MAX_DIMENSION) {
+            const ratio = MAX_DIMENSION / Math.max(w, h);
+            w = Math.round(w * ratio);
+            h = Math.round(h * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+
+        return canvas.toDataURL('image/jpeg', 0.9);
+    }
 
     async function analyzeImage(fullBase64String) {
         showScreen('screen-loading');
