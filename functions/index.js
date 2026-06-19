@@ -19,6 +19,7 @@ exports.analyze = onRequest({
     });
 
     const prompt = `与えられた食事の画像を分析し、写っている料理・食品を種類ごとに分けて、以下のjsonフォーマットでのみ結果を返してください。余計なテキストは一切含めないでください。
+boxは画像内でその料理・食品が占める矩形領域を、画像の幅・高さに対する比率（0.0〜1.0）で表してください。x,yは矩形左上の座標、width,heightは矩形の幅・高さです。
 {
   "items": [
     {
@@ -26,7 +27,8 @@ exports.analyze = onRequest({
       "calories": 推定カロリー,
       "protein": 推定タンパク質量,
       "fat": 推定脂質量,
-      "carbohydrates": 推定炭水化物量
+      "carbohydrates": 推定炭水化物量,
+      "box": { "x": 0.0, "y": 0.0, "width": 0.0, "height": 0.0 }
     }
   ],
   "advice": "栄養士としてのアドバイス"

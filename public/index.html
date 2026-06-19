@@ -98,6 +98,10 @@
         .quantity-display { font-size: 14px; font-weight: 700; min-width: 45px; text-align: center; color: var(--accent-color); }
         .menu-item-info { color: var(--text-sub); font-size: 14px; text-align: right; font-weight: bold; }
 
+        #image-box-overlay { position: absolute; top: 0; left: 0; pointer-events: none; }
+        .food-box { position: absolute; border: 2px solid var(--accent-color); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0); }
+        .food-box-label { position: absolute; top: -26px; left: -2px; background: var(--accent-color); color: #000; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+
         .menu-item-box { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.02); }
         .menu-item-box-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .menu-item-box-name { font-weight: 500; font-size: 16px; color: var(--text-main); }
@@ -137,6 +141,7 @@
         <div class="result-visual">
             <div class="image-wrapper">
                 <img id="result-image" src="" alt="Preview">
+                <div id="image-box-overlay"></div>
             </div>
         </div>
         <div class="result-dashboard">
@@ -282,6 +287,8 @@
         document.getElementById('bar-fat').style.width = `${Math.round((f / totalPFC) * 100)}%`;
         document.getElementById('bar-carbs').style.width = `${Math.round((c / totalPFC) * 100)}%`;
 
+        drawFoodBoxes(items);
+
         const listEl = document.getElementById('menu-items-list');
         listEl.innerHTML = "";
         items.forEach(item => {
@@ -323,6 +330,67 @@
         const now = new Date();
         document.getElementById('val-time').innerText = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     }
+
+    function drawFoodBoxes(items) {
+        const img = document.getElementById('result-image');
+        const overlay = document.getElementById('image-box-overlay');
+        overlay.innerHTML = "";
+
+        if (!img.naturalWidth || !img.naturalHeight) return;
+
+        const renderedW = img.offsetWidth;
+        const renderedH = img.offsetHeight;
+        const naturalRatio = img.naturalWidth / img.naturalHeight;
+        const renderedRatio = renderedW / renderedH;
+
+        let contentW, contentH, offsetX, offsetY;
+        if (naturalRatio > renderedRatio) {
+            contentW = renderedW;
+            contentH = renderedW / naturalRatio;
+            offsetX = 0;
+            offsetY = (renderedH - contentH) / 2;
+        } else {
+            contentH = renderedH;
+            contentW = renderedH * naturalRatio;
+            offsetY = 0;
+            offsetX = (renderedW - contentW) / 2;
+        }
+
+        overlay.style.width = `${renderedW}px`;
+        overlay.style.height = `${renderedH}px`;
+
+        items.forEach(item => {
+            const box = item.box;
+            if (!box) return;
+
+            const left = offsetX + (box.x || 0) * contentW;
+            const top = offsetY + (box.y || 0) * contentH;
+            const width = (box.width || 0) * contentW;
+            const height = (box.height || 0) * contentH;
+            if (width <= 0 || height <= 0) return;
+
+            const boxEl = document.createElement('div');
+            boxEl.className = 'food-box';
+            boxEl.style.left = `${left}px`;
+            boxEl.style.top = `${top}px`;
+            boxEl.style.width = `${width}px`;
+            boxEl.style.height = `${height}px`;
+
+            const label = document.createElement('div');
+            label.className = 'food-box-label';
+            label.textContent = item.name || "料理";
+            boxEl.appendChild(label);
+
+            overlay.appendChild(boxEl);
+        });
+    }
+
+    document.getElementById('result-image').addEventListener('load', function() {
+        if (rawResult) drawFoodBoxes(Array.isArray(rawResult.items) ? rawResult.items : []);
+    });
+    window.addEventListener('resize', function() {
+        if (rawResult) drawFoodBoxes(Array.isArray(rawResult.items) ? rawResult.items : []);
+    });
 
     function updateScale(delta) {
         currentScale = Math.max(0.1, Math.min(5.0, Number((currentScale + delta).toFixed(1))));
