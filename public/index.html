@@ -112,6 +112,8 @@
         .action-area { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 20px; }
         .reset-btn-link { color: var(--text-sub); font-size: 14px; display: flex; align-items: center; gap: 8px; opacity: 0.6; transition: opacity 0.3s; cursor: pointer; }
         .reset-btn-link:hover { opacity: 1; }
+        .save-btn-link { color: var(--accent-color); font-size: 14px; display: flex; align-items: center; gap: 8px; opacity: 0.85; transition: opacity 0.3s; cursor: pointer; }
+        .save-btn-link:hover { opacity: 1; }
     </style>
 </head>
 <body>
@@ -179,6 +181,7 @@
 
             <div class="action-area">
                 <div class="reset-btn-link" onclick="resetApp()"><i class="fa-solid fa-arrow-rotate-left"></i> 別の写真を解析する</div>
+                <div class="save-btn-link" onclick="saveResultImage()"><i class="fa-solid fa-download"></i> 画像として保存</div>
             </div>
         </div>
     </div>
@@ -387,6 +390,55 @@
     window.addEventListener('resize', function() {
         if (rawResult) drawFoodBoxes(Array.isArray(rawResult.items) ? rawResult.items : []);
     });
+
+    function saveResultImage() {
+        const img = document.getElementById('result-image');
+        if (!img.naturalWidth || !rawResult) return;
+
+        const items = Array.isArray(rawResult.items) ? rawResult.items : [];
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const lineWidth = Math.max(2, canvas.width * 0.004);
+        const fontSize = Math.max(14, canvas.width * 0.022);
+        const labelH = fontSize * 1.7;
+
+        items.forEach(item => {
+            const box = item.box;
+            if (!box) return;
+
+            const x = (box.x || 0) * canvas.width;
+            const y = (box.y || 0) * canvas.height;
+            const w = (box.width || 0) * canvas.width;
+            const h = (box.height || 0) * canvas.height;
+            if (w <= 0 || h <= 0) return;
+
+            ctx.strokeStyle = '#deff9a';
+            ctx.lineWidth = lineWidth;
+            ctx.strokeRect(x, y, w, h);
+
+            const label = item.name || "料理";
+            ctx.font = `bold ${fontSize}px 'Urbanist', 'Noto Sans JP', sans-serif`;
+            const textW = ctx.measureText(label).width;
+            const padding = fontSize * 0.5;
+
+            ctx.fillStyle = '#deff9a';
+            ctx.fillRect(x - lineWidth / 2, y - labelH, textW + padding * 2, labelH);
+
+            ctx.fillStyle = '#000';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, x - lineWidth / 2 + padding, y - labelH / 2);
+        });
+
+        const link = document.createElement('a');
+        link.download = 'food-analysis.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
 
     function updateItemScale(index, delta) {
         const current = itemScales[index] || 1.0;
