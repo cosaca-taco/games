@@ -197,7 +197,17 @@
 
         try {
             const jpegDataUrl = await fileToJpegDataUrl(file);
-            document.getElementById('result-image').src = jpegDataUrl;
+            const resultImage = document.getElementById('result-image');
+            const objectUrl = URL.createObjectURL(file);
+
+            const nativelyLoadable = await new Promise((resolve) => {
+                const probe = new Image();
+                probe.onload = () => resolve(probe.naturalWidth > 0 && probe.naturalHeight > 0);
+                probe.onerror = () => resolve(false);
+                probe.src = objectUrl;
+            });
+
+            resultImage.src = nativelyLoadable ? objectUrl : jpegDataUrl;
             analyzeImage(jpegDataUrl);
         } catch (err) {
             console.error(err);
