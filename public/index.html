@@ -263,6 +263,7 @@
 
             let data = await response.json();
             rawResult = data;
+            console.log("[debug] analyze response:", JSON.stringify(data));
             const items = Array.isArray(rawResult.items) ? rawResult.items : [];
             itemScales = items.map(() => 1.0);
 
@@ -374,6 +375,7 @@
 
         const renderedW = img.offsetWidth;
         const renderedH = img.offsetHeight;
+        console.log("[debug] img natural:", img.naturalWidth, img.naturalHeight, "rendered:", renderedW, renderedH, "src:", img.src.slice(0, 40));
         const naturalRatio = img.naturalWidth / img.naturalHeight;
         const renderedRatio = renderedW / renderedH;
 
