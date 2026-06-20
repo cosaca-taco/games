@@ -63,12 +63,22 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .screen-result { flex-direction: column; width: 100%; z-index: 2; overflow-y: auto; }
+        @media (min-width: 992px) { .screen-result { flex-direction: row; } .screen-result.active { height: 100%; } }
 
         .result-visual { padding: 30px; display: flex; justify-content: center; align-items: center; box-sizing: border-box; background-color: rgba(0,0,0,0.2); }
+        @media (min-width: 992px) { .result-visual { flex: 1; height: 100%; } }
         .image-wrapper { position: relative; display: inline-block; max-width: 100%; border-radius: 24px; overflow: visible; border: 1px solid rgba(222,255,154,0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
         .image-wrapper img { display: block; max-width: 100%; max-height: 60vh; object-fit: contain; border-radius: 24px; }
+        @media (min-width: 992px) { .image-wrapper img { max-height: 80vh; } }
 
         .result-dashboard { padding: 30px 40px 40px; background-color: var(--card-bg); display: flex; flex-direction: column; border-top: 1px solid rgba(255,255,255,0.05); box-sizing: border-box; position: relative; }
+        @media (min-width: 992px) { .result-dashboard { flex: 1; height: 100%; overflow-y: auto; border-top: none; border-left: 1px solid rgba(255,255,255,0.05); } }
+
+        .force-stack.screen-result { flex-direction: column !important; height: auto !important; width: 900px !important; }
+        .force-stack .result-visual { flex: none !important; height: auto !important; }
+        .force-stack .result-dashboard { flex: none !important; height: auto !important; overflow: visible !important; border-top: 1px solid rgba(255,255,255,0.05) !important; border-left: none !important; }
+        .force-stack .image-wrapper { width: 100%; }
+        .force-stack .image-wrapper img { max-height: none !important; width: 100% !important; height: auto !important; }
 
         .metric-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; }
         .metric-title { color: var(--text-sub); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; font-weight: 500; }
@@ -367,9 +377,10 @@
         document.getElementById('val-time').innerText = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
     }
 
-    function drawFoodBoxes(items) {
-        const img = document.getElementById('result-image');
-        const overlay = document.getElementById('image-box-overlay');
+    function drawFoodBoxes(items, doc) {
+        doc = doc || document;
+        const img = doc.getElementById('result-image');
+        const overlay = doc.getElementById('image-box-overlay');
         overlay.innerHTML = "";
 
         if (!img.naturalWidth || !img.naturalHeight) return;
@@ -405,14 +416,14 @@
             const height = (box.height || 0) * contentH;
             if (width <= 0 || height <= 0) return;
 
-            const boxEl = document.createElement('div');
+            const boxEl = doc.createElement('div');
             boxEl.className = 'food-box';
             boxEl.style.left = `${left}px`;
             boxEl.style.top = `${top}px`;
             boxEl.style.width = `${width}px`;
             boxEl.style.height = `${height}px`;
 
-            const label = document.createElement('div');
+            const label = doc.createElement('div');
             label.className = 'food-box-label';
             label.textContent = item.name || "料理";
             boxEl.appendChild(label);
@@ -442,11 +453,18 @@
                 scale: 2,
                 useCORS: true,
                 onclone: (clonedDoc) => {
-                    if (!lastJpegDataUrl) return;
+                    const clonedTarget = clonedDoc.getElementById('screen-result');
+                    if (clonedTarget) clonedTarget.classList.add('force-stack');
+
                     const clonedImg = clonedDoc.getElementById('result-image');
-                    if (!clonedImg) return;
+                    const items = Array.isArray(rawResult.items) ? rawResult.items : [];
+
+                    if (!lastJpegDataUrl || !clonedImg) {
+                        if (clonedImg) drawFoodBoxes(items, clonedDoc);
+                        return;
+                    }
                     return new Promise((resolve) => {
-                        clonedImg.onload = resolve;
+                        clonedImg.onload = () => { drawFoodBoxes(items, clonedDoc); resolve(); };
                         clonedImg.onerror = resolve;
                         clonedImg.src = lastJpegDataUrl;
                     });
