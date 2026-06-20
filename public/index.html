@@ -97,7 +97,7 @@
         .menu-item-info { color: var(--text-sub); font-size: 14px; text-align: right; font-weight: bold; }
 
         #image-box-overlay { position: absolute; top: 0; left: 0; pointer-events: none; }
-        .food-box { position: absolute; border: 2px solid var(--accent-color); border-radius: 8px; box-shadow: 0 0 0 9999px rgba(0,0,0,0); }
+        .food-box { position: absolute; border: 2px solid var(--accent-color); border-radius: 8px; }
         .food-box-label { position: absolute; bottom: 100%; left: -2px; background: var(--accent-color); color: #000; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; max-width: 260px; overflow: visible; text-overflow: initial; }
 
         .menu-item-box { border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; background: rgba(255,255,255,0.02); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -190,6 +190,7 @@
     const FUNCTIONS_URL = "https://analyze-roxfc7qfga-uc.a.run.app";
     let rawResult = null;
     let itemScales = [];
+    let lastJpegDataUrl = null;
 
     document.getElementById('file-input').addEventListener('change', async function(e) {
         const file = e.target.files[0];
@@ -197,6 +198,7 @@
 
         try {
             const jpegDataUrl = await fileToJpegDataUrl(file);
+            lastJpegDataUrl = jpegDataUrl;
             const resultImage = document.getElementById('result-image');
             const objectUrl = URL.createObjectURL(file);
 
@@ -263,7 +265,6 @@
 
             let data = await response.json();
             rawResult = data;
-            console.log("[debug] analyze response:", JSON.stringify(data));
             const items = Array.isArray(rawResult.items) ? rawResult.items : [];
             itemScales = items.map(() => 1.0);
 
@@ -375,7 +376,6 @@
 
         const renderedW = img.offsetWidth;
         const renderedH = img.offsetHeight;
-        console.log("[debug] img natural:", img.naturalWidth, img.naturalHeight, "rendered:", renderedW, renderedH, "src:", img.src.slice(0, 40));
         const naturalRatio = img.naturalWidth / img.naturalHeight;
         const renderedRatio = renderedW / renderedH;
 
@@ -441,6 +441,16 @@
                 backgroundColor: '#0c0e12',
                 scale: 2,
                 useCORS: true,
+                onclone: (clonedDoc) => {
+                    if (!lastJpegDataUrl) return;
+                    const clonedImg = clonedDoc.getElementById('result-image');
+                    if (!clonedImg) return;
+                    return new Promise((resolve) => {
+                        clonedImg.onload = resolve;
+                        clonedImg.onerror = resolve;
+                        clonedImg.src = lastJpegDataUrl;
+                    });
+                },
             });
 
             const link = document.createElement('a');
